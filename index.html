@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛹 滑板学习记录表 - 碗池 & 街市动作</title>
+    <style>
+        :root {
+            --bg: #f5f0eb;
+            --card-bg: #ffffff;
+            --text: #2c2416;
+            --text-secondary: #6b5e4a;
+            --accent: #e8753c;
+            --accent2: #e8a040;
+            --street: #5b7bb5;
+            --street-light: #e8eff8;
+            --street-dark: #3d5a8c;
+            --bowl: #4a9c7c;
+            --bowl-light: #e6f5ef;
+            --bowl-dark: #2d7a5f;
+            --star: #f0b429;
+            --danger: #d64545;
+            --success: #3d9c6e;
+            --border: #e8e0d5;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.06);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 6px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --font: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 80px;
+            background-image:
+                radial-gradient(ellipse at 20% 10%, rgba(232, 160, 64, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 90%, rgba(74, 156, 124, 0.05) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 50%, rgba(91, 123, 181, 0.03) 0%, transparent 70%);
+        }
+        /* ========== HEADER ========== */
+        .app-header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.92);
+        }
+        .header-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .app-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+            text-decoration: none;
+        }
+        .app-logo .icon {
+            font-size: 1.8rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+        @keyframes bounce {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-8px);
+            }
+            50% {
+                transform: translateY(0);
+            }
+            70% {
+                transform: translateY(-3px);
+            }
+            85% {
+                transform: translateY(0);
+            }
+        }
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .btn {
+            padding: 9px 18px;
+            border-radius: 50px;
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: var(--transition);
+            font-family: var(--font);
+            letter-spacing: 0.01em;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .btn-sm {
+            padding: 6px 13px;
+            font-size: 0.82rem;
+            border-radius: 50px;
+        }
+        .btn-xs {
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 50px;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 2px 8px rgba(232, 117, 60, 0.25);
+        }
+        .btn-primary:hover {
+            background: #d46935;
+            border-color: #d46935;
+            box-shadow: 0 4px 14px rgba(232, 117, 60, 0.35);
+            transform: translateY(-1px);
+        }
+        .btn-primary:active {
+            transform: scale(0.96);
+            box-shadow: 0 1px 4px rgba(232, 117, 60, 0.2);
+        }
+        .btn-outline {
+            background: transparent;
+            border-color: var(--border);
+            color: var(--text-secondary);
+        }
+        .btn-outline:hover {
+            background: #faf7f3;
+            border-color: #d5c9b5;
+            color: var(--text);
+        }
+        .btn-ghost {
+            background: transparent;
+            border-color: transparent;
+            color: var(--text-secondary);
+            padding: 8px 10px;
+        }
+        .btn-ghost:hover {
+            background: #f5f0eb;
+            color: var(--text);
+        }
+        .btn-danger {
+            background: #fff;
+            border-color: #fcc;
+            color: var(--danger);
+        }
+        .btn-danger:hover {
+            background: #fff5f5;
+            border-color: #faa;
+        }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+            border-color: var(--success);
+        }
+        .btn-success:hover {
+            background: #348b5f;
+        }
+        /* ========== MAIN CONTENT ========== */
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 16px 20px;
+        }
+        /* ========== TABS ========== */
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            background: var(--card-bg);
+            border-radius: 50px;
+            padding: 5px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 20px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .tab-nav::-webkit-scrollbar {
+            display: none;
+        }
+        .tab-btn {
+            flex: 1;
+            min-width: 90px;
+            padding: 11px 18px;
+            border: none;
+            background: transparent;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            font-family: var(--font);
+            color: var(--text-secondary);
+            white-space: nowrap;
+            letter-spacing: 0.01em;
+        }
+        .tab-btn.active {
+            background: #fff;
+            color: var(--text);
+            box-shadow: var(--shadow-sm);
+            font-weight: 700;
+        }
+        .tab-btn:hover:not(.active) {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.5);
+        }
+        .tab-content {
+            display: none;
+            animation: fadeSlideIn 0.3s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* ========== SECTION CARDS ========== */
+        .section-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin: 20px 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.01em;
+        }
+        .section-title .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dot-bowl {
+            background: var(--bowl);
+        }
+        .dot-street {
+            background: var(--street);
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid transparent;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover {
+            box-shadow: var(--shadow);
+            border-color: #e8e0d5;
+            transform: translateY(-1px);
+        }
+        .card:active {
+            transform: scale(0.985);
+            transition: 0.1s ease;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .card-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .difficulty-stars {
+            color: var(--star);
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+        .difficulty-stars .empty {
+            color: #ddd;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+        .badge-bowl {
+            background: var(--bowl-light);
+            color: var(--bowl-dark);
+        }
+        .badge-street {
+            background: var(--street-light);
+            color: var(--street-dark);
+        }
+        .badge-status {
+            font-size: 0.7rem;
+            padding: 3px 9px;
+        }
+        .badge-new {
+            background: #fef3e0;
+            color: #b8781a;
+        }
+        .badge-practice {
+            background: #e8f0fe;
+            color: #3d6db5;
+        }
+        .badge-mastered {
+            background: #e6f5ef;
+            color: #2d7a5f;
+        }
+        /* ========== MODAL ========== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .modal {
+            background: var(--card-bg);
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-width: 700px;
+            max-height: 88vh;
+            overflow-y: auto;
+            padding: 24px 20px 30px;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+            position: relative;
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+        .modal-handle {
+            width: 40px;
+            height: 4px;
+            background: #d5c9b5;
+            border-radius: 2px;
+            margin: 0 auto 16px;
+        }
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: #f5f0eb;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            z-index: 5;
+        }
+        .modal-close:hover {
+            background: #e8e0d5;
+        }
+        .modal h2 {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+            letter-spacing: -0.01em;
+        }
+        .modal .meta-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+        .modal .section-label {
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+            margin: 16px 0 6px;
+        }
+        .modal .要领-text {
+            background: #faf7f3;
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            line-height: 1.7;
+            font-size: 0.95rem;
+            white-space: pre-line;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: #1a1a1a;
+            margin-top: 8px;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .video-placeholder {
+            background: #faf7f3;
+            border-radius: var(--radius-sm);
+            padding: 30px 20px;
+            text-align: center;
+            color: var(--text-secondary);
+            border: 2px dashed #e8e0d5;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .input {
+            flex: 1;
+            min-width: 180px;
+            padding: 10px 14px;
+            border-radius: 50px;
+            border: 1.5px solid var(--border);
+            font-size: 0.9rem;
+            font-family: var(--font);
+            background: #fdfbf8;
+            transition: var(--transition);
+            outline: none;
+        }
+        .input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(232, 117, 60, 0.08);
+            background: #fff;
+        }
+        textarea.input {
+            border-radius: var(--radius-sm);
+            resize: vertical;
+            min-height: 60px;
+        }
+        /* ========== LOG LIST ========== */
+        .log-item {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid transparent;
+            transition: var(--transition);
+        }
+        .log-item.bowl-log {
+            border-left-color: var(--bowl);
+        }
+        .log-item.street-log {
+            border-left-color: var(--street);
+        }
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        .log-date {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+        .log-trick {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .log-meta {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .log-detail {
+            margin-top: 6px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        .log-detail strong {
+            color: var(--text);
+        }
+        .log-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        .empty-state .emoji {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 12px;
+        }
+        /* ========== STATS ========== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 18px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--accent);
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+        .progress-bar-wrap {
+            background: #f0ebe0;
+            border-radius: 50px;
+            height: 8px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 50px;
+            background: linear-gradient(90deg, var(--accent2), var(--accent));
+            transition: width 0.5s ease;
+        }
+        /* ========== SEARCH/FILTER ========== */
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+            align-items: center;
+        }
+        .filter-row select,
+        .filter-row input {
+            padding: 8px 14px;
+            border-radius: 50px;
+            border: 1.5px solid var(--border);
+            font-size: 0.85rem;
+            font-family: var(--font);
+            background: #fdfbf8;
+            outline: none;
+            transition: var(--transition);
+        }
+        .filter-row select:focus,
+        .filter-row input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(232, 117, 60, 0.06);
+        }
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 600px) {
+            .app-header {
+                padding: 10px 14px;
+            }
+            .app-logo {
+                font-size: 1.2rem;
+            }
+            .app-logo .icon {
+                font-size: 1.4rem;
+            }
+            .main-container {
+                padding: 10px 12px;
+            }
+            .card {
+                padding: 14px 16px;
+            }
+            .tab-btn {
+                padding: 9px 12px;
+                font-size: 0.8rem;
+                min-width: 70px;
+            }
+            .btn {
+                padding: 7px 14px;
+                font-size: 0.82rem;
+            }
+            .modal {
+                border-radius: 18px 18px 0 0;
+                padding: 18px 14px 24px;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+        @media (min-width: 768px) {
+            .modal-overlay {
+                align-items: center;
+            }
+            .modal {
+                border-radius: 20px;
+                max-height: 85vh;
+                margin: 0 20px;
+            }
+            .modal-handle {
+                display: none;
+            }
+        }
+        /* ========== PRINT ========== */
+        @media print {
+            body {
+                background: #fff;
+                padding-bottom: 0;
+            }
+            .app-header,
+            .tab-nav,
+            .btn,
+            .modal-overlay,
+            .filter-row,
+            .log-actions,
+            .header-actions,
+            .modal-close,
+            .modal-handle,
+            .video-container,
+            .video-placeholder,
+            .input-group {
+                display: none !important;
+            }
+            .tab-content {
+                display: block !important;
+                page-break-inside: avoid;
+            }
+            .card,
+            .log-item {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                break-inside: avoid;
+            }
+            .main-container {
+                max-width: 100%;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ==================== HEADER ==================== -->
+    <header class="app-header">
+        <div class="header-inner">
+            <div class="app-logo">
+                <span class="icon">🛹</span> 滑板学习记录
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-outline btn-sm" onclick="exportData()" title="导出备份">📥 备份</button>
+                <button class="btn btn-outline btn-sm" onclick="importDataPrompt()" title="导入备份">📤 恢复</button>
+                <input type="file" id="importFileInput" style="display:none" accept=".json" onchange="importData(event)">
+            </div>
+        </div>
+    </header>
+    <!-- ==================== MAIN ==================== -->
+    <div class="main-container">
+        <!-- TABS -->
+        <nav class="tab-nav" id="tabNav">
+            <button class="tab-btn active" data-tab="tab-list">📋 动作清单</button>
+            <button class="tab-btn" data-tab="tab-log">✅ 打卡记录</button>
+            <button class="tab-btn" data-tab="tab-stats">📊 统计</button>
+        </nav>
+        <!-- TAB: 动作清单 -->
+        <div class="tab-content active" id="tab-list">
+            <div id="trickListContainer"></div>
+        </div>
+        <!-- TAB: 打卡记录 -->
+        <div class="tab-content" id="tab-log">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+                <h2 style="font-size:1.2rem;font-weight:700;">✅ 打卡记录</h2>
+                <button class="btn btn-primary btn-sm" onclick="openAddLogModal()">➕ 新增记录</button>
+            </div>
+            <div class="filter-row">
+                <select id="logFilterTrick" onchange="renderLogs()">
+                    <option value="all">全部动作</option>
+                </select>
+                <select id="logFilterCategory" onchange="renderLogs()">
+                    <option value="all">全部分类</option>
+                    <option value="bowl">碗池</option>
+                    <option value="street">街市</option>
+                </select>
+                <input type="date" id="logFilterDate" onchange="renderLogs()" style="max-width:150px;" title="按日期筛选">
+                <button class="btn btn-ghost btn-xs" onclick="clearLogFilters()">清除筛选</button>
+            </div>
+            <div id="logListContainer"></div>
+        </div>
+        <!-- TAB: 统计 -->
+        <div class="tab-content" id="tab-stats">
+            <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:14px;">📊 练习统计</h2>
+            <div class="stats-grid" id="statsGrid"></div>
+            <div id="statsDetailContainer"></div>
+        </div>
+    </div>
+    <!-- ==================== MODAL OVERLAY ==================== -->
+    <div class="modal-overlay" id="modalOverlay" style="display:none;" onclick="closeModalOutside(event)">
+        <div class="modal" id="modalContent" onclick="event.stopPropagation()">
+            <div class="modal-handle"></div>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <div id="modalInner"></div>
+        </div>
+    </div>
+    <script>
+        // ==================== DATA ====================
+        // 动作清单数据
+        const tricksData = {
+            bowl: {
+                name: '碗池动作',
+                icon: '🏊',
+                dotClass: 'dot-bowl',
+                badgeClass: 'badge-bowl',
+                levels: [{
+                    level: '初级',
+                    stars: 1,
+                    tricks: [
+                        { id: 'bowl_dropping_in', name: 'Dropping In', cn: '下碗/切入', desc: '从碗池边缘（coping）滑入碗池内部。\n\n要领：\n1. 将板尾卡在coping上，后轮悬空\n2. 前脚踩在板头螺栓处\n3. 身体重心前倾，眼睛看向碗底\n4. 果断下压前脚，让前轮着地\n5. 身体跟随板子滑入碗池\n6. 关键：不要犹豫，犹豫就容易摔\n\n常见问题：重心后仰导致后摔；前脚下压不够果断。' },
+                        { id: 'bowl_pumping', name: 'Pumping', cn: '摆动加速', desc: '不靠蹬地，仅通过身体上下摆动在碗池中获得速度。\n\n要领：\n1. 滑行中利用碗池的弧面\n2. 上弧面时身体下沉（屈膝）\n3. 到达弧面顶部时身体上弹（伸腿）\n4. 下弧面时再次屈膝蓄力\n5. 节奏感很重要，像荡秋千一样\n6. 手臂配合身体摆动保持平衡\n\n常见问题：节奏不对导致减速；身体僵硬不够放松。' },
+                        { id: 'bowl_kickturn', name: 'Kickturn', cn: '踢转/抬板转', desc: '在弧面上抬起前轮进行转身。\n\n要领：\n1. 滑上弧面减速至几乎停止\n2. 轻抬前脚让前轮离地\n3. 用后轮为轴心转动身体\n4. 头部和肩膀先转向目标方向\n5. 转完后前轮着地滑下\n6. 先在平地上练习抬板头转向\n\n常见问题：转不够角度；抬起太高失去平衡。' },
+                        { id: 'bowl_carving', name: 'Carving', cn: '弧线滑行', desc: '在碗池中沿弧线大幅度转弯滑行。\n\n要领：\n1. 身体倾斜配合转弯\n2. 用脚踝控制板子倾斜角度\n3. 视线引导转弯方向\n4. 保持流畅的速度\n5. 双膝微屈，重心放在脚掌\n6. 像冲浪/滑雪一样的感觉\n\n常见问题：转弯太急失去抓地力；身体和板子不同步。' },
+                        { id: 'bowl_fakie_kickturn', name: 'Fakie Kickturn', cn: '倒滑踢转', desc: '倒滑时在弧面上进行踢转。\n\n要领：\n1. 倒滑上弧面\n2. 抬起前脚（此时是板尾方向）\n3. 转头看向要转的方向\n4. 以着地的轮子为轴转动\n5. 转完后继续倒滑或变正滑\n\n常见问题：方向感混乱；转头不够导致转不过去。' },
+                    ]
+                }, {
+                    level: '中级',
+                    stars: 2,
+                    tricks: [
+                        { id: 'bowl_rock_to_fakie', name: 'Rock to Fakie', cn: '卡沿回落', desc: '滑上coping让板子中间卡在沿上，然后倒滑回落。\n\n要领：\n1. 正滑上弧面冲向coping\n2. 让板子前半部分越过coping\n3. 板子中间（桥之间）卡在coping上\n4. 身体重心保持在碗内\n5. 轻轻后拉让板子回落\n6. 回落时变成倒滑（fakie）\n\n常见问题：板子卡太多翻过去；回落时失去平衡。' },
+                        { id: 'bowl_tail_stall', name: 'Tail Stall', cn: '板尾停驻', desc: '用板尾卡在coping上短暂停驻。\n\n要领：\n1. 滑上弧面接近coping\n2. 用后脚踩板尾\n3. 板尾卡在coping上停住\n4. 身体重心在碗池内侧\n5. 停顿1-2秒后推板回落\n\n常见问题：重心太靠外导致后翻；停驻时间过长失去平衡。' },
+                        { id: 'bowl_axle_stall', name: 'Axle Stall', cn: '桥停驻', desc: '用后桥卡在coping上停驻。\n\n要领：\n1. 滑上弧面让后桥正好卡在coping上\n2. 身体保持平衡\n3. 板子与coping垂直或略倾斜\n4. 短暂停驻后推回落\n\n常见问题：桥没卡准滑落；重心不稳。' },
+                        { id: 'bowl_5050_grind', name: '50-50 Grind', cn: '双桥碾沿', desc: '用前后两个桥同时在coping上碾磨滑行。\n\n要领：\n1. 以一定角度滑上coping\n2. 让前后桥同时落在coping上\n3. 身体保持在碗池内侧\n4. 沿coping滑行一段\n5. 到合适位置推板回落\n\n常见问题：只卡到一个桥；速度太快飞出去。' },
+                        { id: 'bowl_feeble_grind', name: 'Feeble Grind', cn: '后桥碾沿', desc: '后桥在coping上碾磨，前轮在碗池弧面上。\n\n要领：\n1. 滑上coping让后桥卡住\n2. 前轮保持在弧面上\n3. 身体重心偏后\n4. 沿coping滑行\n5. 此动作比50-50容易入门\n\n常见问题：前轮也上了coping变成50-50；后桥滑脱。' },
+                        { id: 'bowl_rock_and_roll', name: 'Rock and Roll', cn: '卡沿转身', desc: '类似Rock to Fakie但在coping上转身180度正滑回落。\n\n要领：\n1. 卡上coping后\n2. 在板子上转身180度\n3. 变成正滑方向\n4. 推板回落正滑\n\n常见问题：转身时板子滑动；转身不够完全。' },
+                        { id: 'bowl_slash_grind', name: 'Slash Grind', cn: '快速碾沿', desc: '快速滑上coping用后桥轻触即走的碾磨。\n\n要领：\n1. 以较快速度滑上\n2. 后桥轻触coping\n3. 不做停顿立即回落\n4. 像"蹭"一下的感觉\n\n常见问题：触沿时间太长；速度控制不好。' },
+                    ]
+                }, {
+                    level: '高级',
+                    stars: 3,
+                    tricks: [
+                        { id: 'bowl_air_out', name: 'Air Out', cn: '腾空飞出', desc: '从碗池中腾空飞出落到池外平地。\n\n要领：\n1. 高速滑上弧面\n2. 在弧面顶端身体向上弹起\n3. 板子离开coping腾空\n4. 控制板子在脚下\n5. 落到池外平地\n\n常见问题：腾空不够高；板子飞脱；落地不稳。' },
+                        { id: 'bowl_frontside_air', name: 'Frontside Air', cn: '前侧腾空', desc: '腾空时身体前侧面向coping。\n\n要领：\n1. 高速滑上弧面\n2. 腾空时身体转向\n3. 前侧朝向coping\n4. 在空中控板\n5. 落回碗池内\n\n常见问题：转向不够；空中失控。' },
+                        { id: 'bowl_backside_air', name: 'Backside Air', cn: '后侧腾空', desc: '腾空时身体后侧（背部）面向coping。\n\n要领：\n1. 高速滑上弧面\n2. 腾空时背部转向coping\n3. 视线越过肩膀看落点\n4. 在空中保持板子贴脚\n5. 落回碗池\n\n常见问题：看不到落点；旋转过度。' },
+                        { id: 'bowl_invert', name: 'Invert', cn: '倒立支撑', desc: '在coping上用手支撑身体倒立。\n\n要领：\n1. 滑上弧面后手抓coping\n2. 身体向上翻转\n3. 脚和板子在空中\n4. 用手支撑体重\n5. 极其进阶的动作\n\n常见问题：手臂力量不足；恐惧心理。' },
+                        { id: 'bowl_handplant', name: 'Handplant', cn: '手撑倒立', desc: '在coping上单手支撑做倒立变体。\n\n要领：\n1. 类似Invert但更注重手部支撑\n2. 单手或双手抓coping\n3. 身体倒立姿态\n4. 板子在空中\n\n常见问题：需要极强的上肢力量和平衡。' },
+                    ]
+                }]
+            },
+            street: {
+                name: '街市动作',
+                icon: '🏙️',
+                dotClass: 'dot-street',
+                badgeClass: 'badge-street',
+                levels: [{
+                    level: '初级',
+                    stars: 1,
+                    tricks: [
+                        { id: 'street_ollie', name: 'Ollie', cn: '豚跳', desc: '滑板最基础最重要的跳跃动作，所有翻板动作的基础。\n\n要领：\n1. 后脚踩板尾，前脚放在板中偏前\n2. 屈膝下蹲蓄力\n3. 后脚猛踩板尾（pop），同时前脚向上向前刷板\n4. 身体向上跳起\n5. 后脚收起让板尾弹起\n6. 前脚刷到板头将板拉平\n7. 双脚落在螺栓处\n\n关键：pop和刷板要同步；前脚刷板要果断；肩膀保持水平。\n\n常见问题：板子转（肩膀歪了）；高度不够（pop不够猛或刷板不快）；板子飞走（前脚没控住）。' },
+                        { id: 'street_manual', name: 'Manual', cn: '后轮平衡', desc: '仅用后轮滑行保持平衡。\n\n要领：\n1. 微微抬起前轮\n2. 重心移到后脚\n3. 用身体微调保持平衡\n4. 手臂张开辅助\n5. 眼睛看远处\n6. 从短距离开始练习\n\n常见问题：抬太高后倒；抬不够前轮着地。' },
+                        { id: 'street_shuvit', name: 'Shuvit', cn: '180度转板', desc: '板子水平旋转180度，身体不转。\n\n要领：\n1. 后脚踩板尾\n2. 前脚轻放在板中\n3. 后脚向后铲（scoop）\n4. 板子旋转180度\n5. 身体不转，只跳起让板转\n6. 双脚落在转好的板子上\n\n常见问题：板子转不够；身体也跟着转；板子翻转。' },
+                        { id: 'street_fs180', name: 'Frontside 180', cn: '前侧180', desc: 'Ollie + 身体前侧旋转180度。\n\n要领：\n1. 做Ollie的同时\n2. 肩膀向身体前侧转动\n3. 头部引导旋转方向\n4. 板子跟随身体转180度\n5. 落地时变成倒滑\n\n常见问题：转不够180度；板子跟不上身体。' },
+                        { id: 'street_bs180', name: 'Backside 180', cn: '后侧180', desc: 'Ollie + 身体后侧旋转180度。\n\n要领：\n1. 做Ollie的同时\n2. 肩膀向背后方向转动\n3. 视线越过肩膀看落点\n4. 板子跟随旋转\n5. 落地时变成倒滑\n\n常见问题：看不到落点害怕；旋转不完全。' },
+                        { id: 'street_fakie_ollie', name: 'Fakie Ollie', cn: '倒滑豚跳', desc: '倒滑时做的Ollie。\n\n要领：\n1. 倒滑姿势\n2. 用前脚（板尾方向）pop\n3. 后脚（板头方向）刷板\n4. 其他和Ollie一样\n5. 落地保持倒滑或转正\n\n常见问题：方向感混乱；pop力度不够。' },
+                    ]
+                }, {
+                    level: '中级',
+                    stars: 2,
+                    tricks: [
+                        { id: 'street_kickflip', name: 'Kickflip', cn: '脚尖翻板', desc: 'Ollie基础上用脚尖让板子纵向翻转360度。\n\n要领：\n1. 站位和Ollie类似但前脚稍斜\n2. 前脚脚尖略悬出板边\n3. Pop后前脚向斜前方刷出\n4. 用脚尖拨动板边让板翻转\n5. 板子翻转360度\n6. 双脚收回落在板子上\n\n关键：前脚要刷出板边并拨动；时机很重要。\n\n常见问题：板子只翻一半；翻太多变成double flip；板子飞走。' },
+                        { id: 'street_heelflip', name: 'Heelflip', cn: '脚跟翻板', desc: '用脚跟让板子反向翻转360度。\n\n要领：\n1. 前脚脚跟悬出板边\n2. Pop后前脚向斜前方踢出\n3. 用脚跟拨动板边\n4. 板子反向翻转360度\n5. 收回双脚落板\n\n常见问题：翻转不够；板子向前飞走。' },
+                        { id: 'street_pop_shuvit', name: 'Pop Shuvit', cn: '打板180转', desc: '带Pop的Shuvit，板子旋转180度。\n\n要领：\n1. 后脚用力pop并向后铲\n2. 板子弹起旋转180度\n3. 前脚不刷板只收起\n4. 身体跳起让板转\n5. 双脚落回板子\n\n常见问题：板子转太多或太少；身体移动。' },
+                        { id: 'street_fs_shuvit', name: 'Frontside Shuvit', cn: '前侧转板', desc: '板子向前侧旋转180度。\n\n要领：\n1. 后脚向前铲\n2. 板子向前侧旋转\n3. 身体跳起\n4. 比普通Shuvit更难\n\n常见问题：板子转不起来；方向搞反。' },
+                        { id: 'street_varial_kickflip', name: 'Varial Kickflip', cn: '变体翻板', desc: 'Pop Shuvit + Kickflip的组合。\n\n要领：\n1. 同时做Pop Shuvit的旋转\n2. 和Kickflip的翻转\n3. 板子同时旋转180度+翻转360度\n4. 需要很好的协调\n\n常见问题：两种动作互相干扰。' },
+                        { id: 'street_5050_grind_ledge', name: '50-50 Grind', cn: '双桥碾台', desc: '在台子/杆子上用双桥碾磨滑行。\n\n要领：\n1. Ollie上台子\n2. 让前后桥同时落在台边\n3. 身体保持平衡\n4. 沿台子滑行\n5. 到末端稍抬板头落下\n\n常见问题：上不去台子；在台子上卡住。' },
+                        { id: 'street_boardslide', name: 'Boardslide', cn: '板身滑杆', desc: '用板子中间在杆子上滑行。\n\n要领：\n1. Ollie上杆\n2. 让板子中间落在杆上\n3. 板子与杆成90度\n4. 身体保持平衡\n5. 滑到末端转正落地\n\n常见问题：上杆角度不对；滑行中板子卡住。' },
+                    ]
+                }, {
+                    level: '高级',
+                    stars: 3,
+                    tricks: [
+                        { id: 'street_tre_flip', name: 'Tre Flip (360 Flip)', cn: '360翻板', desc: 'Pop Shuvit 360度 + Kickflip的组合，标志性高级动作。\n\n要领：\n1. 后脚用力pop并大幅铲转\n2. 板子旋转360度同时翻转\n3. 前脚做Kickflip的拨动\n4. 身体跳高给板子旋转时间\n5. 找准时机双脚落板\n\n常见问题：旋转不够360度；翻转和旋转不同步。' },
+                        { id: 'street_hardflip', name: 'Hardflip', cn: '硬翻', desc: 'Frontside Pop Shuvit + Kickflip。\n\n要领：\n1. 板子向前侧旋转180度\n2. 同时做Kickflip翻转\n3. 动作紧凑有力\n\n常见问题：板子旋转方向混乱。' },
+                        { id: 'street_laser_flip', name: 'Laser Flip', cn: '激光翻', desc: 'Frontside 360 Shuvit + Heelflip。\n\n要领：\n1. 板子前侧旋转360度\n2. 同时Heelflip翻转\n3. 非常高级的组合动作\n\n常见问题：旋转和翻转协调极难。' },
+                        { id: 'street_inward_heelflip', name: 'Inward Heelflip', cn: '内翻脚跟翻', desc: 'Pop Shuvit + Heelflip的组合。\n\n要领：\n1. 板子旋转180度\n2. 同时Heelflip翻转\n3. 与Varial Kickflip方向相反\n\n常见问题：两种动作力量互相抵消。' },
+                        { id: 'street_nollie_flip', name: 'Nollie Flip', cn: '板头翻', desc: '用板头pop做的Kickflip。\n\n要领：\n1. 前脚踩板头pop\n2. 后脚刷板并拨动\n3. 板子翻转360度\n4. 落地时方向改变\n\n常见问题：Nollie pop力量不足。' },
+                        { id: 'street_switch_ollie', name: 'Switch Ollie', cn: '反脚豚跳', desc: '用反脚姿势做的Ollie。\n\n要领：\n1. 完全反脚站位\n2. 用反脚pop和刷板\n3. 所有要领和Ollie一样\n4. 但用的是非惯用脚\n\n常见问题：反脚力量和控制力不足。' },
+                    ]
+                }]
+            }
+        };
+        // 存储键
+        const STORAGE_KEY_LOGS = 'skateboard_practice_logs';
+        const STORAGE_KEY_VIDEOS = 'skateboard_trick_videos';
+        const STORAGE_KEY_STATUS = 'skateboard_trick_status';
+        // 加载数据
+        function loadLogs() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY_LOGS)) || [];
+            } catch (e) { return []; }
+        }
+        function saveLogs(logs) {
+            localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
+        }
+        function loadVideos() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY_VIDEOS)) || {};
+            } catch (e) { return {}; }
+        }
+        function saveVideos(videos) {
+            localStorage.setItem(STORAGE_KEY_VIDEOS, JSON.stringify(videos));
+        }
+        function loadStatuses() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY_STATUS)) || {};
+            } catch (e) { return {}; }
+        }
+        function saveStatuses(statuses) {
+            localStorage.setItem(STORAGE_KEY_STATUS, JSON.stringify(statuses));
+        }
+        // 获取所有动作的扁平列表
+        function getAllTricks() {
+            const all = [];
+            for (const cat of ['bowl', 'street']) {
+                for (const level of tricksData[cat].levels) {
+                    for (const trick of level.tricks) {
+                        all.push({ ...trick, category: cat, level: level.level, stars: level.stars });
+                    }
+                }
+            }
+            return all;
+        }
+        function getTrickById(id) {
+            return getAllTricks().find(t => t.id === id);
+        }
+        // ==================== RENDER: 动作清单 ====================
+        function renderTrickList() {
+            const container = document.getElementById('trickListContainer');
+            const statuses = loadStatuses();
+            let html = '';
+            for (const catKey of ['bowl', 'street']) {
+                const cat = tricksData[catKey];
+                html += `
+                <div class="section-title">
+                    <span class="dot ${cat.dotClass}"></span>
+                    ${cat.icon} ${cat.name}
+                </div>`;
+                for (const level of cat.levels) {
+                    const starHtml = '★'.repeat(level.stars) + '<span class="empty">' + '★'.repeat(3 - level
+                        .stars) + '</span>';
+                    html += `
+                    <div style="margin-bottom:6px;font-weight:600;font-size:0.9rem;color:var(--text-secondary);padding-left:4px;">
+                        ${level.level} <span class="difficulty-stars">${starHtml}</span>
+                    </div>`;
+                    for (const trick of level.tricks) {
+                        const status = statuses[trick.id] || 'new';
+                        const statusBadgeMap = {
+                            'new': '<span class="badge badge-status badge-new">未开始</span>',
+                            'practice': '<span class="badge badge-status badge-practice">练习中</span>',
+                            'mastered': '<span class="badge badge-status badge-mastered">已掌握</span>',
+                        };
+                        const statusBadge = statusBadgeMap[status] || statusBadgeMap['new'];
+                        html += `
+                        <div class="card" onclick="openTrickDetail('${trick.id}')" style="cursor:pointer;">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <span class="badge ${cat.badgeClass}">${catKey === 'bowl' ? '碗池' : '街市'}</span>
+                                    ${trick.name}
+                                    <span class="card-subtitle">${trick.cn}</span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    ${statusBadge}
+                                    <span class="difficulty-stars">${starHtml}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                }
+            }
+            container.innerHTML = html;
+        }
+        // ==================== MODAL: 动作详情 ====================
+        function openTrickDetail(trickId) {
+            const trick = getTrickById(trickId);
+            if (!trick) return;
+            const videos = loadVideos();
+            const statuses = loadStatuses();
+            const currentStatus = statuses[trickId] || 'new';
+            const videoList = videos[trickId] || [];
+            const cat = tricksData[trick.categories] || (trick.category === 'bowl' ? tricksData.bowl : tricksData
+            .street);
+            const starHtml = '★'.repeat(trick.stars) + '<span style="color:#ddd;">' + '★'.repeat(3 - trick.stars) +
+                '</span>';
+            let videoHtml = '';
+            if (videoList.length > 0) {
+                videoHtml = videoList.map((v, i) => {
+                    const embedUrl = getEmbedUrl(v.url);
+                    if (embedUrl) {
+                        return `
+                        <div style="margin-bottom:10px;">
+                            <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px;">📹 ${v.label || '视频 '+(i+1)}</div>
+                            <div class="video-container">
+                                <iframe src="${embedUrl}" allowfullscreen loading="lazy"></iframe>
+                            </div>
+                            <button class="btn btn-xs btn-danger" style="margin-top:4px;" onclick="removeVideo('${trickId}',${i});openTrickDetail('${trickId}');">删除此视频</button>
+                        </div>`;
+                    }
+                    return `
+                        <div style="margin-bottom:10px;">
+                            <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px;">📹 ${v.label || '视频 '+(i+1)}</div>
+                            <div class="video-placeholder">无法解析视频链接：${v.url}<br>请使用YouTube或B站链接</div>
+                            <button class="btn btn-xs btn-danger" style="margin-top:4px;" onclick="removeVideo('${trickId}',${i});openTrickDetail('${trickId}');">删除此视频</button>
+                        </div>`;
+                }).join('');
+            } else {
+                videoHtml = '<div class="video-placeholder">📹 还没有添加视频<br>在下方粘贴YouTube或B站视频链接</div>';
+            }
+            const statusOptions = [
+                { value: 'new', label: '未开始' },
+                { value: 'practice', label: '练习中' },
+                { value: 'mastered', label: '已掌握' },
+            ];
+            const statusSelectHtml = statusOptions.map(s =>
+                `<option value="${s.value}" ${currentStatus===s.value?'selected':''}>${s.label}</option>`
+            ).join('');
+            const modalInner = document.getElementById('modalInner');
+            modalInner.innerHTML = `
+                <h2>${trick.name}</h2>
+                <div class="meta-row">
+                    <span class="badge ${trick.category==='bowl'?'badge-bowl':'badge-street'}">${trick.category==='bowl'?'碗池':'街市'}</span>
+                    <span>${trick.cn}</span>
+                    <span class="difficulty-stars">${starHtml}</span>
+                    <span>${trick.level}</span>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label style="font-weight:600;font-size:0.85rem;">掌握状态：</label>
+                    <select onchange="updateTrickStatus('${trickId}', this.value)" style="padding:6px 12px;border-radius:50px;border:1.5px solid var(--border);font-family:var(--font);font-size:0.85rem;">
+                        ${statusSelectHtml}
+                    </select>
+                </div>
+                <div class="section-label">📝 动作要领</div>
+                <div class="要领-text">${trick.desc}</div>
+                <div class="section-label">🎬 动作视频</div>
+                ${videoHtml}
+                <div class="section-label" style="margin-top:14px;">➕ 添加视频链接</div>
+                <div class="input-group">
+                    <input type="text" class="input" id="videoUrlInput" placeholder="粘贴YouTube或B站视频链接" style="flex:2;min-width:200px;">
+                    <input type="text" class="input" id="videoLabelInput" placeholder="视频标签（可选）" style="flex:1;min-width:120px;">
+                    <button class="btn btn-primary btn-sm" onclick="addVideo('${trickId}')">添加</button>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px;">支持：youtube.com/watch?v=... / youtu.be/... / bilibili.com/video/BV...</div>
+            `;
+            document.getElementById('modalOverlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function getEmbedUrl(url) {
+            if (!url) return null;
+            // YouTube
+            let match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            if (match) return `https://www.youtube.com/embed/${match[1]}`;
+            // B站
+            match = url.match(/bilibili\.com\/video\/(BV[a-zA-Z0-9]+)/);
+            if (match) return `//player.bilibili.com/player.html?bvid=${match[1]}&page=1`;
+            // B站短链接
+            match = url.match(/b23\.tv\/([a-zA-Z0-9]+)/);
+            if (match) return null; // 短链接需要解析，暂返回null让用户用完整链接
+            return null;
+        }
+        function addVideo(trickId) {
+            const urlInput = document.getElementById('videoUrlInput');
+            const labelInput = document.getElementById('videoLabelInput');
+            const url = urlInput.value.trim();
+            const label = labelInput.value.trim() || '';
+            if (!url) return;
+            const videos = loadVideos();
+            if (!videos[trickId]) videos[trickId] = [];
+            videos[trickId].push({ url, label, addedAt: new Date().toISOString() });
+            saveVideos(videos);
+            urlInput.value = '';
+            labelInput.value = '';
+            openTrickDetail(trickId); // 刷新
+        }
+        function removeVideo(trickId, index) {
+            const videos = loadVideos();
+            if (videos[trickId]) {
+                videos[trickId].splice(index, 1);
+                if (videos[trickId].length === 0) delete videos[trickId];
+                saveVideos(videos);
+            }
+        }
+        function updateTrickStatus(trickId, status) {
+            const statuses = loadStatuses();
+            statuses[trickId] = status;
+            saveStatuses(statuses);
+            renderTrickList();
+            renderStats();
+        }
+        function closeModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.body.style.overflow = '';
+            renderTrickList();
+            renderStats();
+        }
+        function closeModalOutside(e) {
+            if (e.target === document.getElementById('modalOverlay')) {
+                closeModal();
+            }
+        }
+        // ==================== RENDER: 打卡记录 ====================
+        function renderLogs() {
+            const container = document.getElementById('logListContainer');
+            const logs = loadLogs();
+            const filterTrick = document.getElementById('logFilterTrick').value;
+            const filterCategory = document.getElementById('logFilterCategory').value;
+            const filterDate = document.getElementById('logFilterDate').value;
+            // 更新筛选下拉框
+            const trickSelect = document.getElementById('logFilterTrick');
+            const currentVal = trickSelect.value;
+            const allTricks = getAllTricks();
+            trickSelect.innerHTML = '<option value="all">全部动作</option>';
+            for (const t of allTricks) {
+                trickSelect.innerHTML +=
+                    `<option value="${t.id}" ${currentVal===t.id?'selected':''}>[${t.category==='bowl'?'碗池':'街市'}] ${t.name}</option>`;
+            }
+            let filtered = [...logs];
+            if (filterTrick !== 'all') filtered = filtered.filter(l => l.trickId === filterTrick);
+            if (filterCategory !== 'all') filtered = filtered.filter(l => {
+                const t = getTrickById(l.trickId);
+                return t && t.category === filterCategory;
+            });
+            if (filterDate) filtered = filtered.filter(l => l.date === filterDate);
+            // 按日期倒序
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date) || b.createdAt - a.createdAt);
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                <div class="empty-state">
+                    <span class="emoji">📭</span>
+                    <p>还没有打卡记录</p>
+                    <p style="font-size:0.85rem;">点击"新增记录"开始记录练习吧！</p>
+                </div>`;
+                return;
+            }
+            container.innerHTML = filtered.map(log => {
+                const trick = getTrickById(log.trickId);
+                const trickName = trick ? trick.name : log.trickId;
+                const catClass = (trick && trick.category === 'bowl') ? 'bowl-log' : 'street-log';
+                const catLabel = (trick && trick.category === 'bowl') ? '碗池' : '街市';
+                const badgeCls = (trick && trick.category === 'bowl') ? 'badge-bowl' : 'badge-street';
+                return `
+                <div class="log-item ${catClass}">
+                    <div class="log-header">
+                        <span class="log-date">📅 ${log.date}</span>
+                        <span class="badge ${badgeCls}">${catLabel}</span>
+                        <span class="log-trick">🛹 ${trickName}</span>
+                        <span class="log-meta">练习 <strong>${log.attempts || 0}</strong> 次</span>
+                    </div>
+                    ${log.problems ? `<div class="log-detail"><strong>⚠️ 存在问题：</strong>${log.problems}</div>` : ''}
+                    ${log.corrections ? `<div class="log-detail"><strong>✅ 改正情况：</strong>${log.corrections}</div>` : ''}
+                    ${log.notes ? `<div class="log-detail"><strong>📝 备注：</strong>${log.notes}</div>` : ''}
+                    <div class="log-actions">
+                        <button class="btn btn-outline btn-xs" onclick="openEditLogModal('${log.id}')">✏️ 编辑</button>
+                        <button class="btn btn-danger btn-xs" onclick="deleteLog('${log.id}')">🗑 删除</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        function clearLogFilters() {
+            document.getElementById('logFilterTrick').value = 'all';
+            document.getElementById('logFilterCategory').value = 'all';
+            document.getElementById('logFilterDate').value = '';
+            renderLogs();
+        }
+        function deleteLog(logId) {
+            if (!confirm('确定要删除这条打卡记录吗？')) return;
+            let logs = loadLogs();
+            logs = logs.filter(l => l.id !== logId);
+            saveLogs(logs);
+            renderLogs();
+            renderStats();
+        }
+        function openAddLogModal() {
+            const allTricks = getAllTricks();
+            const trickOptions = allTricks.map(t =>
+                `<option value="${t.id}">[${t.category==='bowl'?'碗池':'街市'}] ${t.name} (${t.cn})</option>`
+            ).join('');
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('modalInner').innerHTML = `
+                <h2>➕ 新增打卡记录</h2>
+                <div style="margin-top:12px;">
+                    <label style="font-weight:600;font-size:0.9rem;">日期</label>
+                    <input type="date" class="input" id="logDate" value="${today}" style="width:100%;margin-top:4px;">
+                </div>
+                <div style="margin-top:12px;">
+                    <label style="font-weight:600;font-size:0.9rem;">动作</label>
+                    <select class="input" id="logTrickId" style="width:100%;margin-top:4px;">${trickOptions}</select>
+                </div>
+                <div style="margin-top:12px;">
+                    <label style="font-weight:600;font-size:0.9rem;">练习次数</label>
+                    <input type="number" class="input" id="logAttempts" value="30" min="1" style="width:100%;margin-top:4px;">
+                </div>
+                <div style="margin-top:12px;">
+                    <label style="font-weight:600;font-size:0.9rem;">⚠️ 存在问题</label>
+                    <textarea class="input" id="logProblems" rows="2" placeholder="例如：板子转不够180度、重心后仰..." style="width:100%;margin-top:4px;"></textarea>
+                </div>
+                <div style="margin-top:12px;">
+                    <label style="font-weight:600;font-size:0.9rem;">✅ 改正情况</label>
+                    <textarea class="input" id="logCorrections" rows="2" placeholder="例如：加强肩膀转动、前脚刷板更有力..." style="width:100%;margin-top:4px;"></textarea>
+                </div>
+                <div style="margin-top:12px;">
+                    <label style="font-weight:600;font-size:0.9rem;">📝 备注</label>
+                    <textarea class="input" id="logNotes" rows="2" placeholder="其他想记录的内容..." style="width:100%;margin-top:4px;"></textarea>
+                </div>
+                <button class="btn btn-primary" style="width:100%;margin-top:16px;" onclick="saveNewLog()">💾 保存记录</button>
+            `;
+            document.getElementById('modalOverlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function saveNewLog() {
+            const date = document.getElementById('logDate').value;
+            const trickId = document.getElementById('logTrickId').value;
+            const attempts = parseInt(document.getElementById('logAttempts').value) || 0;
+            const problems = document.getElementById('logProblems').value.trim();
+            const corrections = document.getElementById('logCorrections').value.trim();
+            const notes = document.getElementById('logNotes').value.trim();
+            if (!date || !trickId) {
+                alert('请填写日期和选择动作');
+                return;
+            }
+            const logs = loadLogs();
+            logs.push({
+                id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                date,
+                trickId,
+                attempts,
+                problems,
+                corrections,
+                notes,
+                createdAt: Date.now()
+            });
+            saveLogs(logs);
+            closeModal();
+            renderLogs();
+            renderStats();
+            // 自动更新状态为"练习中"
+            const statuses = loadStatuses();
+            if (!statuses[trickId] || statuses[trickId] === 'new') {
+                statuses[trickId] = 'practice';
+                saveStatuses(statuses);
+                renderTrickList();
+            }
+        }
+        function openEditLogModal(logId) {
+            const logs = loadLogs();
+            const log = logs.find(l => l.id === logId);
+            if (!log) return;
+            const allTricks = getAllTricks();
+            const trickOptions = allTricks.map(t =>
+                `<option value="${t.id}" ${log.trickId===t.id?'selected':''}>[${t.category==='bowl'?'碗池':'街市'}] ${t.name} (${t.cn})</option>`
+            ).join('');
+            document.getElementById('modalInner').innerHTML = `
+                <h2>✏️ 编辑打卡记录</h2>
+                <div style="margin-top:12px;">
+                    <label style="font-weight:600;font-size:0.9rem;">日期</label>
+                    <input type="date" class="input" id="logDate" value="${log.date}" style="width:100%;margin-top:4px;">
+                </div>
+                <div style="margin-top:12px;">
+                    <label style="font-weight:600;font-size:0.9rem;">动作</label>
+                    <select class="input" id="logTrickId" style="width:100%;margin-top:4px;">${trickOptions}</select>
+                </div>
+                <div style="margin-top:12px;">
+                    <label style="font-weight:600;font-size:0.9rem;">练习次数</label>
+                    <input type="number" class="input" id="logAttempts" value="${log.attempts||0}" min="1" style="width:100%;margin-top:4px;">
+                </div>
+                <div style="margin-top:12px;">
+                    <label style="font-weight:600;font-size:0.9rem;">⚠️ 存在问题</label>
+                    <textarea class="input" id="logProblems" rows="2" style="width:100%;margin-top:4px;">${log.problems||''}</textarea>
+                </div>
+                <div style="margin-top:12px;">
+                    <label style="font-weight:600;font-size:0.9rem;">✅ 改正情况</label>
+                    <textarea class="input" id="logCorrections" rows="2" style="width:100%;margin-top:4px;">${log.corrections||''}</textarea>
+                </div>
+                <div style="margin-top:12px;">
+                    <label style="font-weight:600;font-size:0.9rem;">📝 备注</label>
+                    <textarea class="input" id="logNotes" rows="2" style="width:100%;margin-top:4px;">${log.notes||''}</textarea>
+                </div>
+                <button class="btn btn-primary" style="width:100%;margin-top:16px;" onclick="updateLog('${logId}')">💾 更新记录</button>
+            `;
+            document.getElementById('modalOverlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function updateLog(logId) {
+            let logs = loadLogs();
+            const idx = logs.findIndex(l => l.id === logId);
+            if (idx === -1) return;
+            logs[idx].date = document.getElementById('logDate').value;
+            logs[idx].trickId = document.getElementById('logTrickId').value;
+            logs[idx].attempts = parseInt(document.getElementById('logAttempts').value) || 0;
+            logs[idx].problems = document.getElementById('logProblems').value.trim();
+            logs[idx].corrections = document.getElementById('logCorrections').value.trim();
+            logs[idx].notes = document.getElementById('logNotes').value.trim();
+            saveLogs(logs);
+            closeModal();
+            renderLogs();
+            renderStats();
+        }
+        // ==================== RENDER: 统计 ====================
+        function renderStats() {
+            const logs = loadLogs();
+            const statuses = loadStatuses();
+            const allTricks = getAllTricks();
+            const grid = document.getElementById('statsGrid');
+            const detailContainer = document.getElementById('statsDetailContainer');
+            const totalAttempts = logs.reduce((sum, l) => sum + (l.attempts || 0), 0);
+            const totalLogs = logs.length;
+            const uniqueTricksPracticed = new Set(logs.map(l => l.trickId)).size;
+            const totalTricks = allTricks.length;
+            const masteredCount = Object.values(statuses).filter(s => s === 'mastered').length;
+            const practiceCount = Object.values(statuses).filter(s => s === 'practice').length;
+            const progressPercent = totalTricks > 0 ? Math.round((masteredCount / totalTricks) * 100) : 0;
+            // 连续打卡天数
+            const dates = [...new Set(logs.map(l => l.date))].sort((a, b) => new Date(b) - new Date(a));
+            let streak = 0;
+            if (dates.length > 0) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                const checkDate = new Date(dates[0]);
+                checkDate.setHours(0, 0, 0, 0);
+                if (checkDate.getTime() === today.getTime() || checkDate.getTime() === yesterday.getTime()) {
+                    streak = 1;
+                    for (let i = 1; i < dates.length; i++) {
+                        const d1 = new Date(dates[i - 1]);
+                        const d2 = new Date(dates[i]);
+                        d1.setHours(0, 0, 0, 0);
+                        d2.setHours(0, 0, 0, 0);
+                        const diff = (d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24);
+                        if (diff === 1) streak++;
+                        else break;
+                    }
+                }
+            }
+            grid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${totalLogs}</div>
+                    <div class="stat-label">总打卡次数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${totalAttempts}</div>
+                    <div class="stat-label">总练习次数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${uniqueTricksPracticed}/${totalTricks}</div>
+                    <div class="stat-label">练习动作数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">🔥 ${streak}</div>
+                    <div class="stat-label">连续打卡天数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color:var(--success);">${masteredCount}</div>
+                    <div class="stat-label">已掌握动作</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${progressPercent}%</div>
+                    <div class="stat-label">掌握进度</div>
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${progressPercent}%;"></div></div>
+                </div>
+            `;
+            // 每个动作的练习统计
+            const trickStats = {};
+            for (const log of logs) {
+                if (!trickStats[log.trickId]) {
+                    trickStats[log.trickId] = { count: 0, totalAttempts: 0, lastDate: log.date };
+                }
+                trickStats[log.trickId].count++;
+                trickStats[log.trickId].totalAttempts += (log.attempts || 0);
+                if (log.date > trickStats[log.trickId].lastDate) {
+                    trickStats[log.trickId].lastDate = log.date;
+                }
+            }
+            const sortedTricks = Object.entries(trickStats)
+                .sort((a, b) => b[1].totalAttempts - a[1].totalAttempts)
+                .slice(0, 15);
+            if (sortedTricks.length > 0) {
+                let detailHtml =
+                    '<h3 style="font-size:1rem;font-weight:700;margin:16px 0 10px;">🏆 练习最多的动作（按总次数排序）</h3>';
+                for (const [trickId, stats] of sortedTricks) {
+                    const trick = getTrickById(trickId);
+                    const name = trick ? trick.name : trickId;
+                    const catLabel = (trick && trick.category === 'bowl') ? '碗池' : '街市';
+                    const status = statuses[trickId] || 'new';
+                    const statusEmoji = status === 'mastered' ? '✅' : status === 'practice' ? '🔄' : '⬜';
+                    detailHtml += `
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#faf7f3;border-radius:8px;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
+                        <span>${statusEmoji} <strong>${name}</strong> <span style="font-size:0.75rem;color:var(--text-secondary);">[${catLabel}]</span></span>
+                        <span style="font-size:0.85rem;">📅 ${stats.lastDate} | 练习 <strong>${stats.totalAttempts}</strong> 次 | 打卡 ${stats.count} 天</span>
+                    </div>`;
+                }
+                detailContainer.innerHTML = detailHtml;
+            } else {
+                detailContainer.innerHTML =
+                    '<div class="empty-state"><span class="emoji">📊</span><p>开始打卡后这里会显示统计数据</p></div>';
+            }
+        }
+        // ==================== 数据导入导出 ====================
+        function exportData() {
+            const data = {
+                logs: loadLogs(),
+                videos: loadVideos(),
+                statuses: loadStatuses(),
+                exportedAt: new Date().toISOString(),
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `滑板学习记录_备份_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        function importDataPrompt() {
+            document.getElementById('importFileInput').click();
+        }
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!confirm('导入数据将覆盖现有记录，确定继续吗？')) {
+                event.target.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.logs && Array.isArray(data.logs)) {
+                        saveLogs(data.logs);
+                    }
+                    if (data.videos && typeof data.videos === 'object') {
+                        saveVideos(data.videos);
+                    }
+                    if (data.statuses && typeof data.statuses === 'object') {
+                        saveStatuses(data.statuses);
+                    }
+                    alert('✅ 数据导入成功！');
+                    renderAll();
+                } catch (err) {
+                    alert('❌ 文件格式错误，请检查文件');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+        // ==================== TAB切换 ====================
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            const btn = document.querySelector(`[data-tab="${tabName}"]`);
+            const content = document.getElementById(tabName);
+            if (btn) btn.classList.add('active');
+            if (content) content.classList.add('active');
+            if (tabName === 'tab-log') renderLogs();
+            if (tabName === 'tab-stats') renderStats();
+            if (tabName === 'tab-list') renderTrickList();
+        }
+        // ==================== 键盘事件 ====================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('modalOverlay');
+                if (overlay.style.display === 'flex') {
+                    closeModal();
+                }
+            }
+        });
+        // ==================== 初始化 ====================
+        function renderAll() {
+            renderTrickList();
+            renderLogs();
+            renderStats();
+        }
+        function init() {
+            // Tab点击事件
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    switchTab(this.dataset.tab);
+                });
+            });
+            // 初始渲染
+            renderAll();
+            // 如果没有日志，添加一些示例数据引导
+            const logs = loadLogs();
+            if (logs.length === 0) {
+                const sampleLogs = [{
+                    id: 'sample_1',
+                    date: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
+                    trickId: 'street_ollie',
+                    attempts: 50,
+                    problems: '板子转歪了，肩膀跟着转',
+                    corrections: '注意保持肩膀水平，前脚刷板要直',
+                    notes: '第一次练习，感觉有进步空间',
+                    createdAt: Date.now() - 3 * 86400000
+                }, {
+                    id: 'sample_2',
+                    date: new Date(Date.now() - 1 * 86400000).toISOString().split('T')[0],
+                    trickId: 'street_ollie',
+                    attempts: 80,
+                    problems: '高度还是不够',
+                    corrections: '后脚pop更有力了，前脚刷板时机需要更早一点',
+                    notes: '比上次好多了！',
+                    createdAt: Date.now() - 1 * 86400000
+                }, {
+                    id: 'sample_3',
+                    date: new Date().toISOString().split('T')[0],
+                    trickId: 'bowl_dropping_in',
+                    attempts: 20,
+                    problems: '有点害怕，重心后仰',
+                    corrections: '教练说重心要前倾，眼睛看碗底',
+                    notes: '成功了一次！很开心',
+                    createdAt: Date.now()
+                }];
+                saveLogs(sampleLogs);
+                // 设置示例状态
+                saveStatuses({ 'street_ollie': 'practice', 'bowl_dropping_in': 'practice' });
+                renderAll();
+            }
+        }
+        init();
+        console.log('🛹 滑板学习记录表已就绪！');
+        console.log('📋 动作清单 - 查看碗池和街市动作');
+        console.log('✅ 打卡记录 - 记录每次练习');
+        console.log('📊 统计 - 查看练习数据');
+        console.log('💡 点击动作卡片查看详情和视频');
+        console.log('📥 使用备份功能导出数据');
+    </script>
