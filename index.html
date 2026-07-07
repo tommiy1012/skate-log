@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🛹 滑板学习记录表 - 碗池 & 街市动作</title>
+    <!-- ===== 引入 D3.js 力导向图库 ===== -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
+        /* ========== 所有原有样式保持不变 ========== */
         :root {
             --bg: #f5f0eb;
             --card-bg: #ffffff;
@@ -50,7 +53,6 @@
                 radial-gradient(ellipse at 80% 90%, rgba(74, 156, 124, 0.05) 0%, transparent 60%),
                 radial-gradient(ellipse at 50% 50%, rgba(91, 123, 181, 0.03) 0%, transparent 70%);
         }
-        /* ========== HEADER ========== */
         .app-header {
             background: var(--card-bg);
             border-bottom: 1px solid var(--border);
@@ -189,13 +191,11 @@
         .btn-success:hover {
             background: #348b5f;
         }
-        /* ========== MAIN CONTENT ========== */
         .main-container {
             max-width: 900px;
             margin: 0 auto;
             padding: 16px 20px;
         }
-        /* ========== TABS ========== */
         .tab-nav {
             display: flex;
             gap: 4px;
@@ -254,7 +254,6 @@
                 transform: translateY(0);
             }
         }
-        /* ========== SECTION CARDS ========== */
         .section-title {
             font-size: 1.15rem;
             font-weight: 700;
@@ -359,16 +358,18 @@
             background: #e6f5ef;
             color: #2d7a5f;
         }
-        /* ========== MODAL ========== */
         .modal-overlay {
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
             z-index: 200;
-            display: flex;
+            display: none;
             align-items: flex-end;
             justify-content: center;
             animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.show {
+            display: flex !important;
         }
         @keyframes fadeIn {
             from {
@@ -445,13 +446,38 @@
             color: var(--text-secondary);
             margin: 16px 0 6px;
         }
-        .modal .要领-text {
+        .要领-text {
             background: #faf7f3;
             border-radius: var(--radius-sm);
             padding: 16px;
             line-height: 1.7;
             font-size: 0.95rem;
-            white-space: pre-line;
+            min-height: 60px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .要领-text:focus {
+            box-shadow: 0 0 0 3px rgba(232, 117, 60, 0.15);
+            background: #fff;
+        }
+        .要领-text img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 8px 0;
+            display: block;
+        }
+        .要领-text .rich-toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 6px 0;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        .要领-text .rich-toolbar .btn {
+            padding: 4px 12px;
+            font-size: 0.8rem;
         }
         .video-container {
             position: relative;
@@ -508,7 +534,6 @@
             resize: vertical;
             min-height: 60px;
         }
-        /* ========== LOG LIST ========== */
         .log-item {
             background: var(--card-bg);
             border-radius: var(--radius);
@@ -572,7 +597,6 @@
             display: block;
             margin-bottom: 12px;
         }
-        /* ========== STATS ========== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -611,7 +635,6 @@
             background: linear-gradient(90deg, var(--accent2), var(--accent));
             transition: width 0.5s ease;
         }
-        /* ========== SEARCH/FILTER ========== */
         .filter-row {
             display: flex;
             gap: 8px;
@@ -635,8 +658,369 @@
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(232, 117, 60, 0.06);
         }
-        /* ========== RESPONSIVE ========== */
+        .graph-container {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            min-height: 500px;
+            position: relative;
+            width: 100%;
+        }
+        .graph-container svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+            background: #fafcff;
+            border-radius: var(--radius-sm);
+            cursor: grab;
+        }
+        .graph-container svg:active {
+            cursor: grabbing;
+        }
+        /* D3 节点样式 */
+        .graph-node-group {
+            cursor: pointer;
+        }
+        .graph-node-group circle {
+            transition: filter 0.2s;
+        }
+        .graph-node-group:hover circle {
+            filter: brightness(0.85) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+        }
+        .graph-node-group text {
+            font-size: 11px;
+            font-weight: 600;
+            fill: #fff;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+            user-select: none;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .graph-edge {
+            stroke: #94a3b8;
+            stroke-width: 2.5;
+            fill: none;
+            transition: stroke 0.2s;
+        }
+        .graph-edge:hover {
+            stroke: #e8753c;
+            stroke-width: 3;
+        }
+        .graph-label {
+            font-size: 13px;
+            fill: var(--text-secondary);
+            font-weight: 600;
+        }
+        .graph-legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            padding: 12px 0 4px;
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .graph-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .graph-legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .graph-legend-dot.lv1 {
+            background: #f59e0b;
+        }
+        .graph-legend-dot.lv2 {
+            background: #3b82f6;
+        }
+        .graph-legend-dot.lv3 {
+            background: #ef4444;
+        }
+        .doc-section {
+            margin-top: 14px;
+            border-top: 1px solid var(--border);
+            padding-top: 14px;
+        }
+        .doc-section .section-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .doc-content {
+            background: #faf7f3;
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            line-height: 1.7;
+            font-size: 0.92rem;
+            white-space: pre-line;
+            min-height: 50px;
+        }
+        .doc-content.empty {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        .doc-edit-area {
+            margin-top: 8px;
+        }
+        .doc-edit-area textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: var(--font);
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 70px;
+            background: #fdfbf8;
+            transition: var(--transition);
+        }
+        .doc-edit-area textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(232, 117, 60, 0.08);
+            outline: none;
+        }
+        .doc-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .practice-count-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f1f5f9;
+            padding: 2px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+        /* ===== 动作管理样式 ===== */
+        .manage-tricks-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .manage-tricks-toolbar .left {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .manage-tricks-toolbar .right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .trick-manage-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: #faf7f3;
+            border-radius: var(--radius-sm);
+            margin-bottom: 6px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .trick-manage-item:hover {
+            background: #f5f0eb;
+        }
+        .trick-manage-item .info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .trick-manage-item .info .name {
+            font-weight: 600;
+        }
+        .trick-manage-item .info .cn {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        .trick-manage-item .info .badge-sm {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 30px;
+        }
+        .trick-manage-item .actions {
+            display: flex;
+            gap: 6px;
+        }
+        .trick-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .trick-form-grid .full-width {
+            grid-column: 1 / -1;
+        }
+        .trick-form-grid label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 2px;
+            color: var(--text-secondary);
+        }
+        .trick-form-grid .input {
+            width: 100%;
+            min-width: unset;
+        }
+        .trick-form-grid textarea.input {
+            min-height: 80px;
+        }
+        /* ===== 日历样式 ===== */
+        .calendar-container {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .calendar-header .month-year {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .calendar-header .btn {
+            padding: 4px 12px;
+            font-size: 0.85rem;
+        }
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .calendar-day {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: transparent;
+            transition: var(--transition);
+            cursor: default;
+            position: relative;
+        }
+        .calendar-day.has-log {
+            background: #d1fae5;
+            color: #065f46;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .calendar-day.has-log:hover {
+            background: #a7f3d0;
+            transform: scale(1.05);
+        }
+        .calendar-day.empty {
+            visibility: hidden;
+        }
+        .calendar-day .dot {
+            display: none;
+        }
+        .calendar-day.has-log .dot {
+            display: block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #065f46;
+            position: absolute;
+            bottom: 4px;
+        }
+        .calendar-day.today {
+            border: 2px solid var(--accent);
+            font-weight: 700;
+        }
+        /* ===== 关系管理样式 ===== */
+        .relation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #faf7f3;
+            border-radius: var(--radius-sm);
+            margin-bottom: 4px;
+            border: 1px solid var(--border);
+        }
+        .relation-item .from-to {
+            font-weight: 500;
+        }
+        .relation-item .from-to .arrow {
+            color: var(--text-secondary);
+            margin: 0 8px;
+        }
+        .relation-item .actions {
+            display: flex;
+            gap: 6px;
+        }
+        .relation-add-form {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 8px;
+            padding: 12px;
+            background: #f5f0eb;
+            border-radius: var(--radius-sm);
+        }
+        .relation-add-form select {
+            flex: 1;
+            min-width: 120px;
+            padding: 8px 12px;
+            border-radius: 50px;
+            border: 1.5px solid var(--border);
+            font-size: 0.85rem;
+            background: #fff;
+        }
+        .relation-add-form .btn {
+            flex-shrink: 0;
+        }
         @media (max-width: 600px) {
+            .trick-form-grid {
+                grid-template-columns: 1fr;
+            }
+            .trick-manage-item {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .trick-manage-item .actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
             .app-header {
                 padding: 10px 14px;
             }
@@ -672,10 +1056,42 @@
             .stat-value {
                 font-size: 1.5rem;
             }
+            .graph-container {
+                min-height: 350px;
+            }
+            .graph-container svg {
+                min-height: 350px;
+            }
+            .manage-tricks-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .manage-tricks-toolbar .left,
+            .manage-tricks-toolbar .right {
+                justify-content: center;
+            }
+            .calendar-day {
+                font-size: 0.75rem;
+            }
+            .calendar-day .dot {
+                width: 4px;
+                height: 4px;
+                bottom: 2px;
+            }
+            .relation-add-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .relation-add-form select {
+                min-width: unset;
+            }
         }
         @media (min-width: 768px) {
             .modal-overlay {
                 align-items: center;
+            }
+            .modal-overlay.show {
+                display: flex;
             }
             .modal {
                 border-radius: 20px;
@@ -686,7 +1102,6 @@
                 display: none;
             }
         }
-        /* ========== PRINT ========== */
         @media print {
             body {
                 background: #fff;
@@ -703,7 +1118,10 @@
             .modal-handle,
             .video-container,
             .video-placeholder,
-            .input-group {
+            .input-group,
+            .doc-actions,
+            .manage-tricks-toolbar,
+            .calendar-container {
                 display: none !important;
             }
             .tab-content {
@@ -720,6 +1138,12 @@
                 max-width: 100%;
                 padding: 0;
             }
+        }
+        #imageFileInput {
+            display: none;
+        }
+        .modal-overlay.show {
+            display: flex !important;
         }
     </style>
 </head>
@@ -744,9 +1168,19 @@
             <button class="tab-btn active" data-tab="tab-list">📋 动作清单</button>
             <button class="tab-btn" data-tab="tab-log">✅ 打卡记录</button>
             <button class="tab-btn" data-tab="tab-stats">📊 统计</button>
+            <button class="tab-btn" data-tab="tab-graph">🗺️ 关系图</button>
         </nav>
         <!-- TAB: 动作清单 -->
         <div class="tab-content active" id="tab-list">
+            <div class="manage-tricks-toolbar">
+                <div class="left">
+                    <span style="font-weight:600;font-size:1.05rem;">📋 动作清单</span>
+                    <span style="font-size:0.8rem;color:var(--text-secondary);" id="trickCountDisplay"></span>
+                </div>
+                <div class="right">
+                    <button class="btn btn-primary btn-sm" id="manageTricksBtn" onclick="window.openManageTricksModal()">⚙️ 管理动作</button>
+                </div>
+            </div>
             <div id="trickListContainer"></div>
         </div>
         <!-- TAB: 打卡记录 -->
@@ -754,6 +1188,17 @@
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
                 <h2 style="font-size:1.2rem;font-weight:700;">✅ 打卡记录</h2>
                 <button class="btn btn-primary btn-sm" onclick="openAddLogModal()">➕ 新增记录</button>
+            </div>
+            <div class="calendar-container" id="calendarContainer">
+                <div class="calendar-header">
+                    <button class="btn btn-outline btn-sm" onclick="changeMonth(-1)">◀ 上月</button>
+                    <span class="month-year" id="calendarMonthYear"></span>
+                    <button class="btn btn-outline btn-sm" onclick="changeMonth(1)">下月 ▶</button>
+                </div>
+                <div class="calendar-weekdays">
+                    <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+                </div>
+                <div class="calendar-days" id="calendarDays"></div>
             </div>
             <div class="filter-row">
                 <select id="logFilterTrick" onchange="renderLogs()">
@@ -775,19 +1220,48 @@
             <div class="stats-grid" id="statsGrid"></div>
             <div id="statsDetailContainer"></div>
         </div>
+        <!-- TAB: 关系图 -->
+        <div class="tab-content" id="tab-graph">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+                <h2 style="font-size:1.2rem;font-weight:700;">🗺️ 动作关系脉络</h2>
+                <button class="btn btn-primary btn-sm" onclick="openEditRelationsModal()">✏️ 编辑关系</button>
+            </div>
+            <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:12px;">
+                💡 点击节点查看详情 · 拖拽节点自由调整 · 滚轮缩放 · 右键拖拽平移
+            </p>
+            <div class="graph-container" id="graphContainer">
+                <svg id="graphSvg"></svg>
+            </div>
+            <div class="graph-legend">
+                <span class="graph-legend-item"><span class="graph-legend-dot lv1"></span> 初级 ⭐</span>
+                <span class="graph-legend-item"><span class="graph-legend-dot lv2"></span> 中级 ⭐⭐</span>
+                <span class="graph-legend-item"><span class="graph-legend-dot lv3"></span> 高级 ⭐⭐⭐</span>
+                <span class="graph-legend-item">➜ 箭头表示前置关系</span>
+            </div>
+        </div>
     </div>
     <!-- ==================== MODAL OVERLAY ==================== -->
-    <div class="modal-overlay" id="modalOverlay" style="display:none;" onclick="closeModalOutside(event)">
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
         <div class="modal" id="modalContent" onclick="event.stopPropagation()">
             <div class="modal-handle"></div>
             <button class="modal-close" onclick="closeModal()">✕</button>
             <div id="modalInner"></div>
         </div>
     </div>
+    <!-- 隐藏的文件输入用于插入图片 -->
+    <input type="file" id="imageFileInput" accept="image/*" style="display:none" onchange="handleImageFileSelect(event)">
+
     <script>
-        // ==================== DATA ====================
-        // 动作清单数据
-        const tricksData = {
+        // ==================== 存储键 ====================
+        const STORAGE_KEY_LOGS = 'skateboard_practice_logs';
+        const STORAGE_KEY_VIDEOS = 'skateboard_trick_videos';
+        const STORAGE_KEY_STATUS = 'skateboard_trick_status';
+        const STORAGE_KEY_DOCS = 'skateboard_trick_docs';
+        const STORAGE_KEY_TRICKS = 'skateboard_tricks_data';
+        const STORAGE_KEY_RELATIONS = 'skateboard_relations';
+
+        // ==================== 默认动作数据（初始库） ====================
+        const DEFAULT_TRICKS_DATA = {
             bowl: {
                 name: '碗池动作',
                 icon: '🏊',
@@ -869,70 +1343,441 @@
                 }]
             }
         };
-        // 存储键
-        const STORAGE_KEY_LOGS = 'skateboard_practice_logs';
-        const STORAGE_KEY_VIDEOS = 'skateboard_trick_videos';
-        const STORAGE_KEY_STATUS = 'skateboard_trick_status';
-        // 加载数据
+
+        // ==================== 默认关系（硬编码，用于首次初始化） ====================
+        const DEFAULT_RELATIONS = [
+            // street
+            { from: 'street_ollie', to: 'street_shuvit' },
+            { from: 'street_ollie', to: 'street_fs180' },
+            { from: 'street_ollie', to: 'street_bs180' },
+            { from: 'street_ollie', to: 'street_fakie_ollie' },
+            { from: 'street_ollie', to: 'street_kickflip' },
+            { from: 'street_ollie', to: 'street_heelflip' },
+            { from: 'street_ollie', to: 'street_pop_shuvit' },
+            { from: 'street_shuvit', to: 'street_pop_shuvit' },
+            { from: 'street_shuvit', to: 'street_kickflip' },
+            { from: 'street_shuvit', to: 'street_heelflip' },
+            { from: 'street_fs180', to: 'street_kickflip' },
+            { from: 'street_fs180', to: 'street_varial_kickflip' },
+            { from: 'street_bs180', to: 'street_kickflip' },
+            { from: 'street_bs180', to: 'street_varial_kickflip' },
+            { from: 'street_kickflip', to: 'street_varial_kickflip' },
+            { from: 'street_kickflip', to: 'street_tre_flip' },
+            { from: 'street_kickflip', to: 'street_hardflip' },
+            { from: 'street_heelflip', to: 'street_varial_kickflip' },
+            { from: 'street_heelflip', to: 'street_inward_heelflip' },
+            { from: 'street_heelflip', to: 'street_laser_flip' },
+            { from: 'street_pop_shuvit', to: 'street_varial_kickflip' },
+            { from: 'street_pop_shuvit', to: 'street_tre_flip' },
+            { from: 'street_varial_kickflip', to: 'street_tre_flip' },
+            { from: 'street_varial_kickflip', to: 'street_hardflip' },
+            { from: 'street_hardflip', to: 'street_tre_flip' },
+            { from: 'street_inward_heelflip', to: 'street_laser_flip' },
+            { from: 'street_switch_ollie', to: 'street_ollie' },
+            { from: 'street_manual', to: 'street_ollie' },
+            { from: 'street_5050_grind_ledge', to: 'street_ollie' },
+            { from: 'street_boardslide', to: 'street_ollie' },
+            // bowl
+            { from: 'bowl_dropping_in', to: 'bowl_pumping' },
+            { from: 'bowl_dropping_in', to: 'bowl_kickturn' },
+            { from: 'bowl_pumping', to: 'bowl_carving' },
+            { from: 'bowl_kickturn', to: 'bowl_carving' },
+            { from: 'bowl_kickturn', to: 'bowl_rock_to_fakie' },
+            { from: 'bowl_kickturn', to: 'bowl_tail_stall' },
+            { from: 'bowl_carving', to: 'bowl_rock_to_fakie' },
+            { from: 'bowl_carving', to: 'bowl_tail_stall' },
+            { from: 'bowl_carving', to: 'bowl_axle_stall' },
+            { from: 'bowl_fakie_kickturn', to: 'bowl_rock_to_fakie' },
+            { from: 'bowl_rock_to_fakie', to: 'bowl_rock_and_roll' },
+            { from: 'bowl_rock_to_fakie', to: 'bowl_5050_grind' },
+            { from: 'bowl_rock_to_fakie', to: 'bowl_feeble_grind' },
+            { from: 'bowl_tail_stall', to: 'bowl_axle_stall' },
+            { from: 'bowl_tail_stall', to: 'bowl_5050_grind' },
+            { from: 'bowl_axle_stall', to: 'bowl_5050_grind' },
+            { from: 'bowl_axle_stall', to: 'bowl_feeble_grind' },
+            { from: 'bowl_5050_grind', to: 'bowl_air_out' },
+            { from: 'bowl_5050_grind', to: 'bowl_frontside_air' },
+            { from: 'bowl_5050_grind', to: 'bowl_backside_air' },
+            { from: 'bowl_feeble_grind', to: 'bowl_slash_grind' },
+            { from: 'bowl_rock_and_roll', to: 'bowl_air_out' },
+            { from: 'bowl_rock_and_roll', to: 'bowl_frontside_air' },
+            { from: 'bowl_slash_grind', to: 'bowl_air_out' },
+            { from: 'bowl_air_out', to: 'bowl_frontside_air' },
+            { from: 'bowl_air_out', to: 'bowl_backside_air' },
+            { from: 'bowl_frontside_air', to: 'bowl_invert' },
+            { from: 'bowl_frontside_air', to: 'bowl_handplant' },
+            { from: 'bowl_backside_air', to: 'bowl_invert' },
+            { from: 'bowl_backside_air', to: 'bowl_handplant' },
+        ];
+
+        // ==================== 动作数据管理 ====================
+        function flattenDefaultTricks() {
+            const result = [];
+            for (const cat of ['bowl', 'street']) {
+                const catData = DEFAULT_TRICKS_DATA[cat];
+                for (const level of catData.levels) {
+                    for (const trick of level.tricks) {
+                        result.push({
+                            id: trick.id,
+                            name: trick.name,
+                            cn: trick.cn,
+                            category: cat,
+                            level: level.level,
+                            stars: level.stars,
+                            desc: trick.desc
+                        });
+                    }
+                }
+            }
+            return result;
+        }
+
+        function loadTricks() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY_TRICKS);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        return parsed;
+                    }
+                }
+            } catch (e) { /* ignore */ }
+            const defaultTricks = flattenDefaultTricks();
+            saveTricks(defaultTricks);
+            return defaultTricks;
+        }
+
+        function saveTricks(tricks) {
+            localStorage.setItem(STORAGE_KEY_TRICKS, JSON.stringify(tricks));
+        }
+
+        let _tricksCache = null;
+
+        function getAllTricks() {
+            if (!_tricksCache) {
+                _tricksCache = loadTricks();
+            }
+            return _tricksCache;
+        }
+
+        function refreshTricksCache() {
+            _tricksCache = loadTricks();
+            return _tricksCache;
+        }
+
+        function getTrickById(id) {
+            const tricks = getAllTricks();
+            return tricks.find(t => t.id === id) || null;
+        }
+
+        function generateTrickId() {
+            const existing = getAllTricks();
+            const ids = existing.map(t => t.id);
+            let base = 'trick_';
+            let counter = 1;
+            while (ids.includes(base + counter)) {
+                counter++;
+            }
+            return base + counter;
+        }
+
+        function addTrick(name, cn, category, stars, desc) {
+            const tricks = getAllTricks();
+            const newTrick = {
+                id: generateTrickId(),
+                name: name.trim(),
+                cn: cn.trim(),
+                category: category,
+                stars: parseInt(stars) || 1,
+                level: ['初级', '中级', '高级'][(parseInt(stars) || 1) - 1] || '初级',
+                desc: desc.trim() || '暂无描述'
+            };
+            tricks.push(newTrick);
+            saveTricks(tricks);
+            refreshTricksCache();
+            return newTrick;
+        }
+
+        function updateTrick(id, name, cn, category, stars, desc) {
+            const tricks = getAllTricks();
+            const idx = tricks.findIndex(t => t.id === id);
+            if (idx === -1) return false;
+            tricks[idx] = {
+                ...tricks[idx],
+                name: name.trim(),
+                cn: cn.trim(),
+                category: category,
+                stars: parseInt(stars) || 1,
+                level: ['初级', '中级', '高级'][(parseInt(stars) || 1) - 1] || '初级',
+                desc: desc.trim() || '暂无描述'
+            };
+            saveTricks(tricks);
+            refreshTricksCache();
+            return true;
+        }
+
+        function deleteTrick(id) {
+            if (!confirm('确定要删除这个动作吗？\n\n⚠️ 将同时删除该动作的所有：\n• 打卡记录\n• 视频链接\n• 文档内容\n• 掌握状态\n• 相关关系')) {
+                return false;
+            }
+            const tricks = getAllTricks();
+            const newTricks = tricks.filter(t => t.id !== id);
+            if (newTricks.length === tricks.length) return false;
+            saveTricks(newTricks);
+            refreshTricksCache();
+            let logs = loadLogs();
+            logs = logs.filter(l => l.trickId !== id);
+            saveLogs(logs);
+            const videos = loadVideos();
+            if (videos[id]) {
+                delete videos[id];
+                saveVideos(videos);
+            }
+            const docs = loadDocuments();
+            if (docs[id]) {
+                delete docs[id];
+                saveDocuments(docs);
+            }
+            const statuses = loadStatuses();
+            if (statuses[id]) {
+                delete statuses[id];
+                saveStatuses(statuses);
+            }
+            let relations = loadRelations();
+            relations = relations.filter(r => r.from !== id && r.to !== id);
+            saveRelations(relations);
+            return true;
+        }
+
+        function getPracticeCount(trickId) {
+            const logs = loadLogs();
+            return logs.filter(l => l.trickId === trickId).length;
+        }
+
+        // ==================== 关系管理 ====================
+        function loadRelations() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY_RELATIONS);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed)) {
+                        const allTricks = getAllTricks();
+                        const validIds = new Set(allTricks.map(t => t.id));
+                        return parsed.filter(r => validIds.has(r.from) && validIds.has(r.to));
+                    }
+                }
+            } catch (e) { /* ignore */ }
+            saveRelations(DEFAULT_RELATIONS);
+            return [...DEFAULT_RELATIONS];
+        }
+
+        function saveRelations(relations) {
+            localStorage.setItem(STORAGE_KEY_RELATIONS, JSON.stringify(relations));
+        }
+
+        function addRelation(from, to) {
+            const relations = loadRelations();
+            if (relations.some(r => r.from === from && r.to === to)) {
+                alert('该关系已存在');
+                return false;
+            }
+            if (from === to) {
+                alert('不能自己连自己');
+                return false;
+            }
+            const allTricks = getAllTricks();
+            const ids = new Set(allTricks.map(t => t.id));
+            if (!ids.has(from) || !ids.has(to)) {
+                alert('动作不存在');
+                return false;
+            }
+            relations.push({ from, to });
+            saveRelations(relations);
+            return true;
+        }
+
+        function removeRelation(index) {
+            const relations = loadRelations();
+            if (index >= 0 && index < relations.length) {
+                relations.splice(index, 1);
+                saveRelations(relations);
+                return true;
+            }
+            return false;
+        }
+
+        // ==================== 辅助函数 ====================
+        function getCategoryInfo(category) {
+            if (category === 'bowl') {
+                return { label: '碗池', badgeClass: 'badge-bowl', dotClass: 'dot-bowl', icon: '🏊' };
+            } else {
+                return { label: '街市', badgeClass: 'badge-street', dotClass: 'dot-street', icon: '🏙️' };
+            }
+        }
+
+        function getStarsHtml(stars) {
+            return '★'.repeat(stars) + '<span class="empty">' + '★'.repeat(3 - stars) + '</span>';
+        }
+
+        function getLevelLabel(stars) {
+            return ['初级', '中级', '高级'][(stars || 1) - 1] || '初级';
+        }
+
+        // ==================== 数据加载函数 ====================
         function loadLogs() {
             try {
                 return JSON.parse(localStorage.getItem(STORAGE_KEY_LOGS)) || [];
             } catch (e) { return []; }
         }
+
         function saveLogs(logs) {
             localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
         }
+
         function loadVideos() {
             try {
                 return JSON.parse(localStorage.getItem(STORAGE_KEY_VIDEOS)) || {};
             } catch (e) { return {}; }
         }
+
         function saveVideos(videos) {
             localStorage.setItem(STORAGE_KEY_VIDEOS, JSON.stringify(videos));
         }
+
         function loadStatuses() {
             try {
                 return JSON.parse(localStorage.getItem(STORAGE_KEY_STATUS)) || {};
             } catch (e) { return {}; }
         }
+
         function saveStatuses(statuses) {
             localStorage.setItem(STORAGE_KEY_STATUS, JSON.stringify(statuses));
         }
-        // 获取所有动作的扁平列表
-        function getAllTricks() {
-            const all = [];
-            for (const cat of ['bowl', 'street']) {
-                for (const level of tricksData[cat].levels) {
-                    for (const trick of level.tricks) {
-                        all.push({ ...trick, category: cat, level: level.level, stars: level.stars });
-                    }
-                }
+
+        function loadDocuments() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY_DOCS)) || {};
+            } catch (e) { return {}; }
+        }
+
+        function saveDocuments(docs) {
+            localStorage.setItem(STORAGE_KEY_DOCS, JSON.stringify(docs));
+        }
+
+        // ==================== 日历功能 ====================
+        let calendarYear, calendarMonth;
+
+        function initCalendar() {
+            const now = new Date();
+            calendarYear = now.getFullYear();
+            calendarMonth = now.getMonth();
+            renderCalendar();
+        }
+
+        function changeMonth(delta) {
+            calendarMonth += delta;
+            if (calendarMonth < 0) {
+                calendarMonth = 11;
+                calendarYear--;
+            } else if (calendarMonth > 11) {
+                calendarMonth = 0;
+                calendarYear++;
             }
-            return all;
+            renderCalendar();
         }
-        function getTrickById(id) {
-            return getAllTricks().find(t => t.id === id);
+
+        function renderCalendar() {
+            const monthYearEl = document.getElementById('calendarMonthYear');
+            const daysContainer = document.getElementById('calendarDays');
+            if (!monthYearEl || !daysContainer) return;
+
+            const months = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+            monthYearEl.textContent = `${calendarYear}年 ${months[calendarMonth]}`;
+
+            const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+            const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+            const logs = loadLogs();
+            const logDates = new Set(logs.map(log => log.date));
+
+            let html = '';
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div class="calendar-day empty"></div>`;
+            }
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${calendarYear}-${String(calendarMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const hasLog = logDates.has(dateStr);
+                const isToday = dateStr === todayStr;
+                let cls = 'calendar-day';
+                if (hasLog) cls += ' has-log';
+                if (isToday) cls += ' today';
+                html += `<div class="${cls}" data-date="${dateStr}" ${hasLog ? `onclick="filterByDate('${dateStr}')"` : ''}>
+                            ${d}
+                            <span class="dot"></span>
+                        </div>`;
+            }
+            daysContainer.innerHTML = html;
         }
+
+        function filterByDate(dateStr) {
+            const dateInput = document.getElementById('logFilterDate');
+            if (dateInput) {
+                dateInput.value = dateStr;
+                renderLogs();
+            }
+        }
+
         // ==================== RENDER: 动作清单 ====================
         function renderTrickList() {
             const container = document.getElementById('trickListContainer');
             const statuses = loadStatuses();
+            const allTricks = getAllTricks();
+
+            document.getElementById('trickCountDisplay').textContent = `共 ${allTricks.length} 个动作`;
+
+            if (allTricks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="emoji">📭</span>
+                        <p>还没有动作</p>
+                        <p style="font-size:0.85rem;">点击「管理动作」添加第一个动作吧！</p>
+                    </div>`;
+                return;
+            }
+
+            const grouped = { bowl: { 1: [], 2: [], 3: [] }, street: { 1: [], 2: [], 3: [] } };
+            for (const t of allTricks) {
+                const cat = t.category || 'street';
+                const stars = t.stars || 1;
+                if (!grouped[cat]) grouped[cat] = { 1: [], 2: [], 3: [] };
+                if (!grouped[cat][stars]) grouped[cat][stars] = [];
+                grouped[cat][stars].push(t);
+            }
+
             let html = '';
             for (const catKey of ['bowl', 'street']) {
-                const cat = tricksData[catKey];
+                const catInfo = getCategoryInfo(catKey);
+                const catData = grouped[catKey];
+                if (!catData || Object.values(catData).every(arr => arr.length === 0)) continue;
+
                 html += `
-                <div class="section-title">
-                    <span class="dot ${cat.dotClass}"></span>
-                    ${cat.icon} ${cat.name}
-                </div>`;
-                for (const level of cat.levels) {
-                    const starHtml = '★'.repeat(level.stars) + '<span class="empty">' + '★'.repeat(3 - level
-                        .stars) + '</span>';
-                    html += `
-                    <div style="margin-bottom:6px;font-weight:600;font-size:0.9rem;color:var(--text-secondary);padding-left:4px;">
-                        ${level.level} <span class="difficulty-stars">${starHtml}</span>
+                    <div class="section-title">
+                        <span class="dot ${catInfo.dotClass}"></span>
+                        ${catInfo.icon} ${catKey === 'bowl' ? '碗池动作' : '街市动作'}
                     </div>`;
-                    for (const trick of level.tricks) {
+
+                for (const stars of [1, 2, 3]) {
+                    const tricksInLevel = catData[stars] || [];
+                    if (tricksInLevel.length === 0) continue;
+                    const starHtml = getStarsHtml(stars);
+                    const levelLabel = getLevelLabel(stars);
+                    html += `
+                        <div style="margin-bottom:6px;font-weight:600;font-size:0.9rem;color:var(--text-secondary);padding-left:4px;">
+                            ${levelLabel} <span class="difficulty-stars">${starHtml}</span>
+                        </div>`;
+                    for (const trick of tricksInLevel) {
                         const status = statuses[trick.id] || 'new';
                         const statusBadgeMap = {
                             'new': '<span class="badge badge-status badge-new">未开始</span>',
@@ -941,60 +1786,378 @@
                         };
                         const statusBadge = statusBadgeMap[status] || statusBadgeMap['new'];
                         html += `
-                        <div class="card" onclick="openTrickDetail('${trick.id}')" style="cursor:pointer;">
-                            <div class="card-header">
-                                <div class="card-title">
-                                    <span class="badge ${cat.badgeClass}">${catKey === 'bowl' ? '碗池' : '街市'}</span>
-                                    ${trick.name}
-                                    <span class="card-subtitle">${trick.cn}</span>
+                            <div class="card" onclick="openTrickDetail('${trick.id}')" style="cursor:pointer;">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        <span class="badge ${catInfo.badgeClass}">${catKey === 'bowl' ? '碗池' : '街市'}</span>
+                                        ${trick.name}
+                                        <span class="card-subtitle">${trick.cn || ''}</span>
+                                    </div>
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        ${statusBadge}
+                                        <span class="difficulty-stars">${starHtml}</span>
+                                    </div>
                                 </div>
-                                <div style="display:flex;align-items:center;gap:8px;">
-                                    ${statusBadge}
-                                    <span class="difficulty-stars">${starHtml}</span>
-                                </div>
-                            </div>
-                        </div>`;
+                            </div>`;
                     }
                 }
             }
             container.innerHTML = html;
         }
-        // ==================== MODAL: 动作详情 ====================
-        function openTrickDetail(trickId) {
+
+        // ==================== 动作管理模态框 ====================
+        window.openManageTricksModal = function() {
+            console.log('📂 打开管理动作面板');
+            try {
+                const overlay = document.getElementById('modalOverlay');
+                if (!overlay) {
+                    alert('模态框元素缺失，请刷新页面');
+                    return;
+                }
+                overlay.style.display = 'flex';
+                overlay.style.opacity = '1';
+                overlay.style.visibility = 'visible';
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+                renderManageTricksList();
+            } catch (e) {
+                console.error('❌ 打开失败:', e);
+                alert('打开管理面板失败：' + e.message);
+            }
+        };
+
+        function renderManageTricksList() {
+            try {
+                const allTricks = getAllTricks();
+                const modalInner = document.getElementById('modalInner');
+                if (!modalInner) {
+                    alert('内部元素缺失，请刷新页面');
+                    return;
+                }
+
+                let listHtml = '';
+                if (allTricks.length === 0) {
+                    listHtml = `<div class="empty-state"><span class="emoji">📭</span><p>还没有任何动作，点击下方添加</p></div>`;
+                } else {
+                    for (const t of allTricks) {
+                        const catInfo = getCategoryInfo(t.category);
+                        const starStr = '⭐'.repeat(t.stars);
+                        const practiceCount = getPracticeCount(t.id);
+                        listHtml += `
+                            <div class="trick-manage-item">
+                                <div class="info">
+                                    <span class="badge ${catInfo.badgeClass}">${catInfo.label}</span>
+                                    <span class="name">${t.name}</span>
+                                    <span class="cn">${t.cn || ''}</span>
+                                    <span style="font-size:0.75rem;color:var(--text-secondary);">${starStr}</span>
+                                    <span style="font-size:0.7rem;color:var(--text-secondary);">🏋️ ${practiceCount}</span>
+                                </div>
+                                <div class="actions">
+                                    <button class="btn btn-outline btn-xs" onclick="openEditTrickForm('${t.id}')">✏️</button>
+                                    <button class="btn btn-danger btn-xs" onclick="handleDeleteTrick('${t.id}')">🗑</button>
+                                </div>
+                            </div>`;
+                    }
+                }
+
+                modalInner.innerHTML = `
+                    <h2>⚙️ 管理动作清单</h2>
+                    <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:12px;">
+                        共 ${allTricks.length} 个动作 · 点击 ✏️ 编辑 · 🗑 删除（会清理关联数据）
+                    </p>
+                    <div style="margin-bottom:12px;">
+                        <button class="btn btn-primary btn-sm" onclick="openAddTrickForm()">➕ 添加新动作</button>
+                    </div>
+                    <div id="manageTrickListContainer">
+                        ${listHtml}
+                    </div>
+                    <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px;text-align:right;">
+                        <button class="btn btn-outline btn-sm" onclick="closeModal()">关闭</button>
+                    </div>
+                `;
+            } catch (e) {
+                console.error('❌ 渲染失败:', e);
+                const modalInner = document.getElementById('modalInner');
+                if (modalInner) {
+                    modalInner.innerHTML = `
+                        <h2>⚠️ 加载失败</h2>
+                        <p style="color:var(--danger);">渲染管理列表时出错：${e.message}</p>
+                        <p style="margin-top:12px;">请尝试刷新页面后重试。</p>
+                        <button class="btn btn-outline btn-sm" onclick="closeModal()" style="margin-top:12px;">关闭</button>
+                    `;
+                }
+            }
+        }
+
+        window.openAddTrickForm = function() {
+            showTrickForm(null, '添加新动作');
+        };
+
+        window.openEditTrickForm = function(trickId) {
             const trick = getTrickById(trickId);
-            if (!trick) return;
+            if (!trick) {
+                alert('动作不存在，可能已被删除');
+                renderManageTricksList();
+                return;
+            }
+            showTrickForm(trick, '编辑动作');
+        };
+
+        function showTrickForm(trick, title) {
+            const isEdit = !!trick;
+            const id = trick ? trick.id : '';
+            const name = trick ? trick.name : '';
+            const cn = trick ? trick.cn : '';
+            const category = trick ? trick.category : 'street';
+            const stars = trick ? trick.stars : 1;
+            const desc = trick ? trick.desc : '';
+
+            const modalInner = document.getElementById('modalInner');
+            modalInner.innerHTML = `
+                <h2>${title}</h2>
+                <div class="trick-form-grid" style="margin-top:12px;">
+                    <div class="full-width">
+                        <label>动作名称（英文） *</label>
+                        <input type="text" class="input" id="trickFormName" value="${name}" placeholder="例如：Ollie">
+                    </div>
+                    <div class="full-width">
+                        <label>中文名 *</label>
+                        <input type="text" class="input" id="trickFormCn" value="${cn}" placeholder="例如：豚跳">
+                    </div>
+                    <div>
+                        <label>分类 *</label>
+                        <select class="input" id="trickFormCategory">
+                            <option value="bowl" ${category==='bowl'?'selected':''}>🏊 碗池</option>
+                            <option value="street" ${category==='street'?'selected':''}>🏙️ 街市</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>难度 *</label>
+                        <select class="input" id="trickFormStars">
+                            <option value="1" ${stars===1?'selected':''}>⭐ 初级</option>
+                            <option value="2" ${stars===2?'selected':''}>⭐⭐ 中级</option>
+                            <option value="3" ${stars===3?'selected':''}>⭐⭐⭐ 高级</option>
+                        </select>
+                    </div>
+                    <div class="full-width">
+                        <label>动作要领描述</label>
+                        <textarea class="input" id="trickFormDesc" rows="4" placeholder="描述动作的要领、步骤、常见问题...">${desc}</textarea>
+                    </div>
+                </div>
+                <div style="display:flex;gap:12px;margin-top:16px;justify-content:flex-end;">
+                    <button class="btn btn-outline" onclick="renderManageTricksList()">取消</button>
+                    <button class="btn btn-primary" onclick="saveTrickForm('${id}', ${isEdit})">💾 保存</button>
+                </div>
+            `;
+        }
+
+        window.saveTrickForm = function(id, isEdit) {
+            try {
+                const name = document.getElementById('trickFormName').value.trim();
+                const cn = document.getElementById('trickFormCn').value.trim();
+                const category = document.getElementById('trickFormCategory').value;
+                const stars = parseInt(document.getElementById('trickFormStars').value) || 1;
+                const desc = document.getElementById('trickFormDesc').value.trim();
+
+                if (!name) { alert('请填写动作名称'); return; }
+                if (!cn) { alert('请填写中文名'); return; }
+
+                if (isEdit) {
+                    updateTrick(id, name, cn, category, stars, desc);
+                } else {
+                    addTrick(name, cn, category, stars, desc);
+                }
+
+                renderManageTricksList();
+                renderTrickList();
+                renderStats();
+                renderGraph();
+                renderLogs();
+            } catch (e) {
+                console.error('❌ 保存失败:', e);
+                alert('保存失败：' + e.message);
+            }
+        };
+
+        window.handleDeleteTrick = function(trickId) {
+            try {
+                if (deleteTrick(trickId)) {
+                    renderManageTricksList();
+                    renderTrickList();
+                    renderStats();
+                    renderGraph();
+                    renderLogs();
+                }
+            } catch (e) {
+                console.error('❌ 删除失败:', e);
+                alert('删除失败：' + e.message);
+            }
+        };
+
+        // ==================== 关系编辑模态框 ====================
+        window.openEditRelationsModal = function() {
+            console.log('📂 打开关系编辑面板');
+            try {
+                const overlay = document.getElementById('modalOverlay');
+                if (!overlay) {
+                    alert('模态框元素缺失，请刷新页面');
+                    return;
+                }
+                overlay.style.display = 'flex';
+                overlay.style.opacity = '1';
+                overlay.style.visibility = 'visible';
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+                renderManageRelations();
+            } catch (e) {
+                console.error('❌ 打开关系编辑失败:', e);
+                alert('打开关系编辑面板失败：' + e.message);
+            }
+        };
+
+        function renderManageRelations() {
+            try {
+                const relations = loadRelations();
+                const allTricks = getAllTricks();
+                const modalInner = document.getElementById('modalInner');
+
+                const optionsHtml = allTricks.map(t =>
+                    `<option value="${t.id}">${t.name} (${t.cn||''})</option>`
+                ).join('');
+
+                let listHtml = '';
+                if (relations.length === 0) {
+                    listHtml = `<div class="empty-state"><span class="emoji">🔗</span><p>暂无任何关系，添加一条吧</p></div>`;
+                } else {
+                    for (let i = 0; i < relations.length; i++) {
+                        const r = relations[i];
+                        const fromTrick = getTrickById(r.from);
+                        const toTrick = getTrickById(r.to);
+                        const fromName = fromTrick ? fromTrick.name : r.from + '(已删除)';
+                        const toName = toTrick ? toTrick.name : r.to + '(已删除)';
+                        listHtml += `
+                            <div class="relation-item">
+                                <div class="from-to">
+                                    <span class="from">${fromName}</span>
+                                    <span class="arrow">➜</span>
+                                    <span class="to">${toName}</span>
+                                </div>
+                                <div class="actions">
+                                    <button class="btn btn-danger btn-xs" onclick="handleRemoveRelation(${i})">🗑</button>
+                                </div>
+                            </div>`;
+                    }
+                }
+
+                modalInner.innerHTML = `
+                    <h2>🔗 编辑动作关系</h2>
+                    <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:12px;">
+                        定义动作间的进阶关系（箭头方向：前置 ➜ 后续）
+                    </p>
+                    <div class="relation-add-form">
+                        <select id="relFromSelect">
+                            <option value="">— 选择来源动作 —</option>
+                            ${optionsHtml}
+                        </select>
+                        <span style="font-weight:bold;">➜</span>
+                        <select id="relToSelect">
+                            <option value="">— 选择目标动作 —</option>
+                            ${optionsHtml}
+                        </select>
+                        <button class="btn btn-primary btn-sm" onclick="handleAddRelation()">➕ 添加</button>
+                    </div>
+                    <div style="margin-top:16px;max-height:300px;overflow-y:auto;">
+                        ${listHtml}
+                    </div>
+                    <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px;text-align:right;">
+                        <button class="btn btn-outline btn-sm" onclick="closeModal()">关闭</button>
+                    </div>
+                `;
+            } catch (e) {
+                console.error('❌ 渲染关系列表失败:', e);
+                const modalInner = document.getElementById('modalInner');
+                if (modalInner) {
+                    modalInner.innerHTML = `
+                        <h2>⚠️ 加载失败</h2>
+                        <p style="color:var(--danger);">渲染关系列表时出错：${e.message}</p>
+                        <p style="margin-top:12px;">请尝试刷新页面后重试。</p>
+                        <button class="btn btn-outline btn-sm" onclick="closeModal()" style="margin-top:12px;">关闭</button>
+                    `;
+                }
+            }
+        }
+
+        window.handleAddRelation = function() {
+            const from = document.getElementById('relFromSelect').value;
+            const to = document.getElementById('relToSelect').value;
+            if (!from || !to) {
+                alert('请选择两个动作');
+                return;
+            }
+            if (addRelation(from, to)) {
+                renderManageRelations();
+                renderGraph();
+            }
+        };
+
+        window.handleRemoveRelation = function(index) {
+            if (removeRelation(index)) {
+                renderManageRelations();
+                renderGraph();
+            }
+        };
+
+        // ==================== MODAL: 动作详情 ====================
+        let currentEditingTrickId = null;
+
+        window.openTrickDetail = function(trickId) {
+            currentEditingTrickId = trickId;
+            const trick = getTrickById(trickId);
+            if (!trick) {
+                alert('动作不存在，可能已被删除');
+                return;
+            }
             const videos = loadVideos();
             const statuses = loadStatuses();
+            const logs = loadLogs();
             const currentStatus = statuses[trickId] || 'new';
             const videoList = videos[trickId] || [];
-            const cat = tricksData[trick.categories] || (trick.category === 'bowl' ? tricksData.bowl : tricksData
-            .street);
-            const starHtml = '★'.repeat(trick.stars) + '<span style="color:#ddd;">' + '★'.repeat(3 - trick.stars) +
-                '</span>';
+            const catInfo = getCategoryInfo(trick.category);
+            const starHtml = getStarsHtml(trick.stars);
+
+            const practiceCount = logs.filter(l => l.trickId === trickId).length;
+            const totalAttempts = logs.filter(l => l.trickId === trickId).reduce((sum, l) => sum + (l.attempts || 0), 0);
+
+            const docData = loadDocuments();
+            const doc = docData[trickId] || {};
+            const richDesc = doc.richDesc || '';
+            const displayDesc = richDesc || (trick.desc || '').replace(/\n/g, '<br>');
+
             let videoHtml = '';
             if (videoList.length > 0) {
                 videoHtml = videoList.map((v, i) => {
                     const embedUrl = getEmbedUrl(v.url);
                     if (embedUrl) {
                         return `
-                        <div style="margin-bottom:10px;">
-                            <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px;">📹 ${v.label || '视频 '+(i+1)}</div>
-                            <div class="video-container">
-                                <iframe src="${embedUrl}" allowfullscreen loading="lazy"></iframe>
-                            </div>
-                            <button class="btn btn-xs btn-danger" style="margin-top:4px;" onclick="removeVideo('${trickId}',${i});openTrickDetail('${trickId}');">删除此视频</button>
-                        </div>`;
+                            <div style="margin-bottom:10px;">
+                                <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px;">📹 ${v.label || '视频 '+(i+1)}</div>
+                                <div class="video-container">
+                                    <iframe src="${embedUrl}" allowfullscreen loading="lazy"></iframe>
+                                </div>
+                                <button class="btn btn-xs btn-danger" style="margin-top:4px;" onclick="removeVideo('${trickId}',${i});openTrickDetail('${trickId}');">删除此视频</button>
+                            </div>`;
                     }
                     return `
-                        <div style="margin-bottom:10px;">
-                            <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px;">📹 ${v.label || '视频 '+(i+1)}</div>
-                            <div class="video-placeholder">无法解析视频链接：${v.url}<br>请使用YouTube或B站链接</div>
-                            <button class="btn btn-xs btn-danger" style="margin-top:4px;" onclick="removeVideo('${trickId}',${i});openTrickDetail('${trickId}');">删除此视频</button>
-                        </div>`;
+                            <div style="margin-bottom:10px;">
+                                <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px;">📹 ${v.label || '视频 '+(i+1)}</div>
+                                <div class="video-placeholder">无法解析视频链接：${v.url}<br>请使用YouTube或B站链接</div>
+                                <button class="btn btn-xs btn-danger" style="margin-top:4px;" onclick="removeVideo('${trickId}',${i});openTrickDetail('${trickId}');">删除此视频</button>
+                            </div>`;
                 }).join('');
             } else {
                 videoHtml = '<div class="video-placeholder">📹 还没有添加视频<br>在下方粘贴YouTube或B站视频链接</div>';
             }
+
             const statusOptions = [
                 { value: 'new', label: '未开始' },
                 { value: 'practice', label: '练习中' },
@@ -1003,14 +2166,65 @@
             const statusSelectHtml = statusOptions.map(s =>
                 `<option value="${s.value}" ${currentStatus===s.value?'selected':''}>${s.label}</option>`
             ).join('');
+
+            const descHtml = `
+                <div class="section-label" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                    <span>📝 动作要领 <span style="font-weight:400;text-transform:none;font-size:0.8rem;color:var(--text-secondary);">（可编辑，支持图片）</span></span>
+                    <span>
+                        <button class="btn btn-outline btn-xs" id="editDescBtn_${trickId}" onclick="enableDescEdit('${trickId}')">✏️ 编辑</button>
+                        <button class="btn btn-primary btn-xs" id="saveDescBtn_${trickId}" style="display:none;" onclick="saveDescEdit('${trickId}')">💾 保存</button>
+                        <button class="btn btn-outline btn-xs" id="cancelDescBtn_${trickId}" style="display:none;" onclick="cancelDescEdit('${trickId}')">取消</button>
+                    </span>
+                </div>
+                <div id="descDisplay_${trickId}" class="要领-text" contenteditable="false">
+                    ${displayDesc}
+                </div>
+                <div id="descToolbar_${trickId}" style="display:none; margin-top:6px;" class="rich-toolbar">
+                    <button class="btn btn-outline btn-xs" onclick="insertImageToDesc('${trickId}')">🖼️ 插入图片</button>
+                    <span style="display:flex;gap:4px;align-items:center;">
+                        <input type="text" id="imageUrlInput_${trickId}" placeholder="图片URL" style="padding:4px 8px;border-radius:30px;border:1px solid var(--border);font-size:0.8rem;width:180px;">
+                        <button class="btn btn-outline btn-xs" onclick="insertImageUrl('${trickId}')">插入链接</button>
+                    </span>
+                    <span style="font-size:0.7rem;color:var(--text-secondary);margin-left:auto;">支持粘贴图片</span>
+                </div>
+            `;
+
+            const docHtml = `
+                <div class="doc-section">
+                    <div class="section-label" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                        <span>📝 自定义文档</span>
+                        <span class="practice-count-badge">🏋️ 练习 ${practiceCount} 次 · 共 ${totalAttempts} 次尝试</span>
+                    </div>
+                    <div id="docDisplay_${trickId}" style="${(doc.description || doc.tips) ? '' : 'display:none;'}">
+                        <div class="doc-content">${(doc.description || '').replace(/\n/g, '<br>')}</div>
+                        ${doc.tips ? `<div style="margin-top:8px;padding:10px 14px;background:#fef9e7;border-radius:8px;border-left:3px solid var(--accent2);font-size:0.88rem;"><strong>💡 技巧：</strong>${doc.tips.replace(/\n/g, '<br>')}</div>` : ''}
+                        <div class="doc-actions" style="margin-top:8px;">
+                            <button class="btn btn-outline btn-xs" onclick="toggleDocEdit('${trickId}')">✏️ 编辑</button>
+                        </div>
+                    </div>
+                    <div id="docEdit_${trickId}" style="${(doc.description || doc.tips) ? 'display:none;' : ''}">
+                        <div class="doc-edit-area">
+                            <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);">📝 描述</label>
+                            <textarea id="docDesc_${trickId}" rows="3" placeholder="描述这个动作的要领、步骤...">${doc.description || ''}</textarea>
+                            <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin-top:8px;">💡 技巧提示</label>
+                            <textarea id="docTips_${trickId}" rows="2" placeholder="写一些练习技巧...">${doc.tips || ''}</textarea>
+                        </div>
+                        <div class="doc-actions">
+                            <button class="btn btn-primary btn-xs" onclick="saveDocument('${trickId}')">💾 保存文档</button>
+                            <button class="btn btn-outline btn-xs" onclick="cancelDocEdit('${trickId}')">取消</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
             const modalInner = document.getElementById('modalInner');
             modalInner.innerHTML = `
                 <h2>${trick.name}</h2>
                 <div class="meta-row">
-                    <span class="badge ${trick.category==='bowl'?'badge-bowl':'badge-street'}">${trick.category==='bowl'?'碗池':'街市'}</span>
-                    <span>${trick.cn}</span>
+                    <span class="badge ${catInfo.badgeClass}">${catInfo.label}</span>
+                    <span>${trick.cn || ''}</span>
                     <span class="difficulty-stars">${starHtml}</span>
-                    <span>${trick.level}</span>
+                    <span>${getLevelLabel(trick.stars)}</span>
                 </div>
                 <div style="margin-bottom:10px;">
                     <label style="font-weight:600;font-size:0.85rem;">掌握状态：</label>
@@ -1018,8 +2232,8 @@
                         ${statusSelectHtml}
                     </select>
                 </div>
-                <div class="section-label">📝 动作要领</div>
-                <div class="要领-text">${trick.desc}</div>
+                ${descHtml}
+                ${docHtml}
                 <div class="section-label">🎬 动作视频</div>
                 ${videoHtml}
                 <div class="section-label" style="margin-top:14px;">➕ 添加视频链接</div>
@@ -1030,23 +2244,163 @@
                 </div>
                 <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px;">支持：youtube.com/watch?v=... / youtu.be/... / bilibili.com/video/BV...</div>
             `;
-            document.getElementById('modalOverlay').style.display = 'flex';
+
+            const overlay = document.getElementById('modalOverlay');
+            overlay.classList.add('show');
+            overlay.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-        }
+        };
+
+        // ===== 要领编辑相关函数 =====
+        window.enableDescEdit = function(trickId) {
+            const displayDiv = document.getElementById(`descDisplay_${trickId}`);
+            const toolbar = document.getElementById(`descToolbar_${trickId}`);
+            const editBtn = document.getElementById(`editDescBtn_${trickId}`);
+            const saveBtn = document.getElementById(`saveDescBtn_${trickId}`);
+            const cancelBtn = document.getElementById(`cancelDescBtn_${trickId}`);
+
+            displayDiv.contentEditable = true;
+            displayDiv.focus();
+            toolbar.style.display = 'flex';
+            editBtn.style.display = 'none';
+            saveBtn.style.display = 'inline-flex';
+            cancelBtn.style.display = 'inline-flex';
+
+            displayDiv.addEventListener('paste', function(e) {
+                const items = e.clipboardData.items;
+                for (let item of items) {
+                    if (item.type.startsWith('image/')) {
+                        e.preventDefault();
+                        const file = item.getAsFile();
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            const img = document.createElement('img');
+                            img.src = ev.target.result;
+                            img.style.maxWidth = '100%';
+                            img.style.height = 'auto';
+                            img.style.margin = '8px 0';
+                            img.style.display = 'block';
+                            document.execCommand('insertHTML', false, img.outerHTML);
+                        };
+                        reader.readAsDataURL(file);
+                        break;
+                    }
+                }
+            });
+        };
+
+        window.cancelDescEdit = function(trickId) {
+            const docData = loadDocuments();
+            const doc = docData[trickId] || {};
+            const richDesc = doc.richDesc || '';
+            const trick = getTrickById(trickId);
+            const presetDesc = trick ? trick.desc : '';
+            const displayDesc = richDesc || presetDesc.replace(/\n/g, '<br>');
+
+            const displayDiv = document.getElementById(`descDisplay_${trickId}`);
+            displayDiv.innerHTML = displayDesc;
+            displayDiv.contentEditable = false;
+
+            document.getElementById(`descToolbar_${trickId}`).style.display = 'none';
+            document.getElementById(`editDescBtn_${trickId}`).style.display = 'inline-flex';
+            document.getElementById(`saveDescBtn_${trickId}`).style.display = 'none';
+            document.getElementById(`cancelDescBtn_${trickId}`).style.display = 'none';
+        };
+
+        window.saveDescEdit = function(trickId) {
+            const displayDiv = document.getElementById(`descDisplay_${trickId}`);
+            const html = displayDiv.innerHTML;
+            const docs = loadDocuments();
+            if (!docs[trickId]) docs[trickId] = {};
+            docs[trickId].richDesc = html;
+            saveDocuments(docs);
+            displayDiv.contentEditable = false;
+            document.getElementById(`descToolbar_${trickId}`).style.display = 'none';
+            document.getElementById(`editDescBtn_${trickId}`).style.display = 'inline-flex';
+            document.getElementById(`saveDescBtn_${trickId}`).style.display = 'none';
+            document.getElementById(`cancelDescBtn_${trickId}`).style.display = 'none';
+        };
+
+        window.insertImageToDesc = function(trickId) {
+            document.getElementById('imageFileInput').click();
+            window._pendingImageTrick = trickId;
+        };
+
+        window.handleImageFileSelect = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const trickId = window._pendingImageTrick;
+            if (!trickId) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                const displayDiv = document.getElementById(`descDisplay_${trickId}`);
+                const img = document.createElement('img');
+                img.src = dataUrl;
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                img.style.margin = '8px 0';
+                img.style.display = 'block';
+                document.execCommand('insertHTML', false, img.outerHTML);
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        };
+
+        window.insertImageUrl = function(trickId) {
+            const urlInput = document.getElementById(`imageUrlInput_${trickId}`);
+            const url = urlInput.value.trim();
+            if (!url) return;
+            const displayDiv = document.getElementById(`descDisplay_${trickId}`);
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.margin = '8px 0';
+            img.style.display = 'block';
+            img.onerror = function() { alert('图片加载失败，请检查URL'); };
+            document.execCommand('insertHTML', false, img.outerHTML);
+            urlInput.value = '';
+        };
+
+        // ===== 文档编辑函数 =====
+        window.toggleDocEdit = function(trickId) {
+            document.getElementById(`docDisplay_${trickId}`).style.display = 'none';
+            document.getElementById(`docEdit_${trickId}`).style.display = 'block';
+        };
+
+        window.cancelDocEdit = function(trickId) {
+            const docData = loadDocuments();
+            const doc = docData[trickId] || { description: '', tips: '' };
+            const hasDoc = doc.description || doc.tips;
+            document.getElementById(`docDisplay_${trickId}`).style.display = hasDoc ? 'block' : 'none';
+            document.getElementById(`docEdit_${trickId}`).style.display = hasDoc ? 'none' : 'block';
+            document.getElementById(`docDesc_${trickId}`).value = doc.description || '';
+            document.getElementById(`docTips_${trickId}`).value = doc.tips || '';
+        };
+
+        window.saveDocument = function(trickId) {
+            const desc = document.getElementById(`docDesc_${trickId}`).value.trim();
+            const tips = document.getElementById(`docTips_${trickId}`).value.trim();
+            const docs = loadDocuments();
+            if (!docs[trickId]) docs[trickId] = {};
+            docs[trickId].description = desc;
+            docs[trickId].tips = tips;
+            saveDocuments(docs);
+            openTrickDetail(trickId);
+        };
+
+        // ===== 视频相关 =====
         function getEmbedUrl(url) {
             if (!url) return null;
-            // YouTube
             let match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
             if (match) return `https://www.youtube.com/embed/${match[1]}`;
-            // B站
             match = url.match(/bilibili\.com\/video\/(BV[a-zA-Z0-9]+)/);
             if (match) return `//player.bilibili.com/player.html?bvid=${match[1]}&page=1`;
-            // B站短链接
-            match = url.match(/b23\.tv\/([a-zA-Z0-9]+)/);
-            if (match) return null; // 短链接需要解析，暂返回null让用户用完整链接
             return null;
         }
-        function addVideo(trickId) {
+
+        window.addVideo = function(trickId) {
             const urlInput = document.getElementById('videoUrlInput');
             const labelInput = document.getElementById('videoLabelInput');
             const url = urlInput.value.trim();
@@ -1058,34 +2412,44 @@
             saveVideos(videos);
             urlInput.value = '';
             labelInput.value = '';
-            openTrickDetail(trickId); // 刷新
-        }
-        function removeVideo(trickId, index) {
+            openTrickDetail(trickId);
+        };
+
+        window.removeVideo = function(trickId, index) {
             const videos = loadVideos();
             if (videos[trickId]) {
                 videos[trickId].splice(index, 1);
                 if (videos[trickId].length === 0) delete videos[trickId];
                 saveVideos(videos);
             }
-        }
-        function updateTrickStatus(trickId, status) {
+        };
+
+        window.updateTrickStatus = function(trickId, status) {
             const statuses = loadStatuses();
             statuses[trickId] = status;
             saveStatuses(statuses);
             renderTrickList();
             renderStats();
-        }
-        function closeModal() {
-            document.getElementById('modalOverlay').style.display = 'none';
+        };
+
+        // ==================== 模态框关闭 ====================
+        window.closeModal = function() {
+            const overlay = document.getElementById('modalOverlay');
+            overlay.classList.remove('show');
+            overlay.style.display = 'none';
+            overlay.style.opacity = '';
+            overlay.style.visibility = '';
             document.body.style.overflow = '';
             renderTrickList();
             renderStats();
-        }
-        function closeModalOutside(e) {
+        };
+
+        window.closeModalOutside = function(e) {
             if (e.target === document.getElementById('modalOverlay')) {
                 closeModal();
             }
-        }
+        };
+
         // ==================== RENDER: 打卡记录 ====================
         function renderLogs() {
             const container = document.getElementById('logListContainer');
@@ -1093,7 +2457,6 @@
             const filterTrick = document.getElementById('logFilterTrick').value;
             const filterCategory = document.getElementById('logFilterCategory').value;
             const filterDate = document.getElementById('logFilterDate').value;
-            // 更新筛选下拉框
             const trickSelect = document.getElementById('logFilterTrick');
             const currentVal = trickSelect.value;
             const allTricks = getAllTricks();
@@ -1109,59 +2472,63 @@
                 return t && t.category === filterCategory;
             });
             if (filterDate) filtered = filtered.filter(l => l.date === filterDate);
-            // 按日期倒序
             filtered.sort((a, b) => new Date(b.date) - new Date(a.date) || b.createdAt - a.createdAt);
             if (filtered.length === 0) {
                 container.innerHTML = `
-                <div class="empty-state">
-                    <span class="emoji">📭</span>
-                    <p>还没有打卡记录</p>
-                    <p style="font-size:0.85rem;">点击"新增记录"开始记录练习吧！</p>
-                </div>`;
-                return;
+                    <div class="empty-state">
+                        <span class="emoji">📭</span>
+                        <p>还没有打卡记录</p>
+                        <p style="font-size:0.85rem;">点击"新增记录"开始记录练习吧！</p>
+                    </div>`;
+            } else {
+                container.innerHTML = filtered.map(log => {
+                    const trick = getTrickById(log.trickId);
+                    const trickName = trick ? trick.name : log.trickId;
+                    const catClass = (trick && trick.category === 'bowl') ? 'bowl-log' : 'street-log';
+                    const catLabel = (trick && trick.category === 'bowl') ? '碗池' : '街市';
+                    const badgeCls = (trick && trick.category === 'bowl') ? 'badge-bowl' : 'badge-street';
+                    return `
+                        <div class="log-item ${catClass}">
+                            <div class="log-header">
+                                <span class="log-date">📅 ${log.date}</span>
+                                <span class="badge ${badgeCls}">${catLabel}</span>
+                                <span class="log-trick">🛹 ${trickName}</span>
+                                <span class="log-meta">练习 <strong>${log.attempts || 0}</strong> 次</span>
+                            </div>
+                            ${log.problems ? `<div class="log-detail"><strong>⚠️ 存在问题：</strong>${log.problems}</div>` : ''}
+                            ${log.corrections ? `<div class="log-detail"><strong>✅ 改正情况：</strong>${log.corrections}</div>` : ''}
+                            ${log.notes ? `<div class="log-detail"><strong>📝 备注：</strong>${log.notes}</div>` : ''}
+                            <div class="log-actions">
+                                <button class="btn btn-outline btn-xs" onclick="openEditLogModal('${log.id}')">✏️ 编辑</button>
+                                <button class="btn btn-danger btn-xs" onclick="deleteLog('${log.id}')">🗑 删除</button>
+                            </div>
+                        </div>`;
+                }).join('');
             }
-            container.innerHTML = filtered.map(log => {
-                const trick = getTrickById(log.trickId);
-                const trickName = trick ? trick.name : log.trickId;
-                const catClass = (trick && trick.category === 'bowl') ? 'bowl-log' : 'street-log';
-                const catLabel = (trick && trick.category === 'bowl') ? '碗池' : '街市';
-                const badgeCls = (trick && trick.category === 'bowl') ? 'badge-bowl' : 'badge-street';
-                return `
-                <div class="log-item ${catClass}">
-                    <div class="log-header">
-                        <span class="log-date">📅 ${log.date}</span>
-                        <span class="badge ${badgeCls}">${catLabel}</span>
-                        <span class="log-trick">🛹 ${trickName}</span>
-                        <span class="log-meta">练习 <strong>${log.attempts || 0}</strong> 次</span>
-                    </div>
-                    ${log.problems ? `<div class="log-detail"><strong>⚠️ 存在问题：</strong>${log.problems}</div>` : ''}
-                    ${log.corrections ? `<div class="log-detail"><strong>✅ 改正情况：</strong>${log.corrections}</div>` : ''}
-                    ${log.notes ? `<div class="log-detail"><strong>📝 备注：</strong>${log.notes}</div>` : ''}
-                    <div class="log-actions">
-                        <button class="btn btn-outline btn-xs" onclick="openEditLogModal('${log.id}')">✏️ 编辑</button>
-                        <button class="btn btn-danger btn-xs" onclick="deleteLog('${log.id}')">🗑 删除</button>
-                    </div>
-                </div>`;
-            }).join('');
+
+            renderCalendar();
         }
-        function clearLogFilters() {
+
+        window.clearLogFilters = function() {
             document.getElementById('logFilterTrick').value = 'all';
             document.getElementById('logFilterCategory').value = 'all';
             document.getElementById('logFilterDate').value = '';
             renderLogs();
-        }
-        function deleteLog(logId) {
+        };
+
+        window.deleteLog = function(logId) {
             if (!confirm('确定要删除这条打卡记录吗？')) return;
             let logs = loadLogs();
             logs = logs.filter(l => l.id !== logId);
             saveLogs(logs);
             renderLogs();
             renderStats();
-        }
-        function openAddLogModal() {
+        };
+
+        window.openAddLogModal = function() {
             const allTricks = getAllTricks();
             const trickOptions = allTricks.map(t =>
-                `<option value="${t.id}">[${t.category==='bowl'?'碗池':'街市'}] ${t.name} (${t.cn})</option>`
+                `<option value="${t.id}">[${t.category==='bowl'?'碗池':'街市'}] ${t.name} (${t.cn||''})</option>`
             ).join('');
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('modalInner').innerHTML = `
@@ -1192,10 +2559,13 @@
                 </div>
                 <button class="btn btn-primary" style="width:100%;margin-top:16px;" onclick="saveNewLog()">💾 保存记录</button>
             `;
-            document.getElementById('modalOverlay').style.display = 'flex';
+            const overlay = document.getElementById('modalOverlay');
+            overlay.classList.add('show');
+            overlay.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-        }
-        function saveNewLog() {
+        };
+
+        window.saveNewLog = function() {
             const date = document.getElementById('logDate').value;
             const trickId = document.getElementById('logTrickId').value;
             const attempts = parseInt(document.getElementById('logAttempts').value) || 0;
@@ -1221,21 +2591,22 @@
             closeModal();
             renderLogs();
             renderStats();
-            // 自动更新状态为"练习中"
+            renderGraph();
             const statuses = loadStatuses();
             if (!statuses[trickId] || statuses[trickId] === 'new') {
                 statuses[trickId] = 'practice';
                 saveStatuses(statuses);
                 renderTrickList();
             }
-        }
-        function openEditLogModal(logId) {
+        };
+
+        window.openEditLogModal = function(logId) {
             const logs = loadLogs();
             const log = logs.find(l => l.id === logId);
             if (!log) return;
             const allTricks = getAllTricks();
             const trickOptions = allTricks.map(t =>
-                `<option value="${t.id}" ${log.trickId===t.id?'selected':''}>[${t.category==='bowl'?'碗池':'街市'}] ${t.name} (${t.cn})</option>`
+                `<option value="${t.id}" ${log.trickId===t.id?'selected':''}>[${t.category==='bowl'?'碗池':'街市'}] ${t.name} (${t.cn||''})</option>`
             ).join('');
             document.getElementById('modalInner').innerHTML = `
                 <h2>✏️ 编辑打卡记录</h2>
@@ -1265,10 +2636,13 @@
                 </div>
                 <button class="btn btn-primary" style="width:100%;margin-top:16px;" onclick="updateLog('${logId}')">💾 更新记录</button>
             `;
-            document.getElementById('modalOverlay').style.display = 'flex';
+            const overlay = document.getElementById('modalOverlay');
+            overlay.classList.add('show');
+            overlay.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-        }
-        function updateLog(logId) {
+        };
+
+        window.updateLog = function(logId) {
             let logs = loadLogs();
             const idx = logs.findIndex(l => l.id === logId);
             if (idx === -1) return;
@@ -1282,7 +2656,9 @@
             closeModal();
             renderLogs();
             renderStats();
-        }
+            renderGraph();
+        };
+
         // ==================== RENDER: 统计 ====================
         function renderStats() {
             const logs = loadLogs();
@@ -1297,7 +2673,6 @@
             const masteredCount = Object.values(statuses).filter(s => s === 'mastered').length;
             const practiceCount = Object.values(statuses).filter(s => s === 'practice').length;
             const progressPercent = totalTricks > 0 ? Math.round((masteredCount / totalTricks) * 100) : 0;
-            // 连续打卡天数
             const dates = [...new Set(logs.map(l => l.date))].sort((a, b) => new Date(b) - new Date(a));
             let streak = 0;
             if (dates.length > 0) {
@@ -1347,7 +2722,6 @@
                     <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${progressPercent}%;"></div></div>
                 </div>
             `;
-            // 每个动作的练习统计
             const trickStats = {};
             for (const log of logs) {
                 if (!trickStats[log.trickId]) {
@@ -1372,10 +2746,10 @@
                     const status = statuses[trickId] || 'new';
                     const statusEmoji = status === 'mastered' ? '✅' : status === 'practice' ? '🔄' : '⬜';
                     detailHtml += `
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#faf7f3;border-radius:8px;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
-                        <span>${statusEmoji} <strong>${name}</strong> <span style="font-size:0.75rem;color:var(--text-secondary);">[${catLabel}]</span></span>
-                        <span style="font-size:0.85rem;">📅 ${stats.lastDate} | 练习 <strong>${stats.totalAttempts}</strong> 次 | 打卡 ${stats.count} 天</span>
-                    </div>`;
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#faf7f3;border-radius:8px;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
+                            <span>${statusEmoji} <strong>${name}</strong> <span style="font-size:0.75rem;color:var(--text-secondary);">[${catLabel}]</span></span>
+                            <span style="font-size:0.85rem;">📅 ${stats.lastDate} | 练习 <strong>${stats.totalAttempts}</strong> 次 | 打卡 ${stats.count} 天</span>
+                        </div>`;
                 }
                 detailContainer.innerHTML = detailHtml;
             } else {
@@ -1383,12 +2757,204 @@
                     '<div class="empty-state"><span class="emoji">📊</span><p>开始打卡后这里会显示统计数据</p></div>';
             }
         }
+
+        // ==================== 关系图渲染（使用 D3 力导向图） ====================
+        function renderGraph() {
+            const container = document.getElementById('graphContainer');
+            const svgElement = document.getElementById('graphSvg');
+            if (!container || !svgElement) return;
+
+            const allTricks = getAllTricks();
+            if (allTricks.length === 0) {
+                svgElement.innerHTML = `<text x="500" y="275" text-anchor="middle" fill="#94a3b8" font-size="20">暂无动作数据</text>`;
+                return;
+            }
+
+            // 清空 SVG
+            d3.select(svgElement).selectAll('*').remove();
+
+            const width = container.clientWidth || 900;
+            const height = 500;
+
+            // 准备节点数据
+            const logs = loadLogs();
+            const nodes = allTricks.map(t => ({
+                id: t.id,
+                name: t.name,
+                stars: t.stars,
+                count: logs.filter(l => l.trickId === t.id).length
+            }));
+
+            // 准备链接数据
+            const relations = loadRelations();
+            const validIds = new Set(nodes.map(n => n.id));
+            const links = relations
+                .filter(r => validIds.has(r.from) && validIds.has(r.to))
+                .map(r => ({ source: r.from, target: r.to }));
+
+            // 创建 SVG 画布
+            const svg = d3.select(svgElement)
+                .attr('viewBox', `0 0 ${width} ${height}`)
+                .style('width', '100%')
+                .style('height', '100%');
+
+            // 定义箭头标记
+            const defs = svg.append('defs');
+            defs.append('marker')
+                .attr('id', 'arrowhead')
+                .attr('markerWidth', 10)
+                .attr('markerHeight', 7)
+                .attr('refX', 9)
+                .attr('refY', 3.5)
+                .attr('orient', 'auto')
+                .append('polygon')
+                .attr('points', '0 0, 10 3.5, 0 7')
+                .attr('fill', '#94a3b8');
+
+            // 添加阴影滤镜
+            const filter = defs.append('filter')
+                .attr('id', 'shadow')
+                .attr('x', '-20%')
+                .attr('y', '-20%')
+                .attr('width', '140%')
+                .attr('height', '140%');
+            filter.append('feDropShadow')
+                .attr('dx', 1)
+                .attr('dy', 2)
+                .attr('stdDeviation', 3)
+                .attr('flood-opacity', 0.12);
+
+            // 容器组（用于缩放和平移）
+            const g = svg.append('g');
+
+            // 力模拟
+            const simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(links).id(d => d.id).distance(150).strength(0.8))
+                .force('charge', d3.forceManyBody().strength(-500))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(50));
+
+            // 绘制连线
+            const linkGroup = g.append('g')
+                .attr('class', 'links')
+                .selectAll('path')
+                .data(links)
+                .enter()
+                .append('path')
+                .attr('class', 'graph-edge')
+                .attr('marker-end', 'url(#arrowhead)');
+
+            // 绘制节点
+            const colors = { 1: '#f59e0b', 2: '#3b82f6', 3: '#ef4444' };
+            const nodeGroup = g.append('g')
+                .attr('class', 'nodes')
+                .selectAll('g')
+                .data(nodes)
+                .enter()
+                .append('g')
+                .attr('class', 'graph-node-group')
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended)
+                )
+                .on('click', (event, d) => {
+                    window.openTrickDetail(d.id);
+                });
+
+            // 节点圆形
+            nodeGroup.append('circle')
+                .attr('r', d => 30 + Math.min(d.count * 1.2, 15))
+                .attr('fill', d => colors[d.stars] || '#94a3b8')
+                .attr('filter', 'url(#shadow)')
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2);
+
+            // 节点文字
+            nodeGroup.append('text')
+                .attr('dy', 2)
+                .text(d => d.name)
+                .attr('font-size', d => (30 + Math.min(d.count * 1.2, 15)) > 38 ? 12 : 10)
+                .attr('font-weight', 600)
+                .attr('fill', '#fff')
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'central')
+                .style('pointer-events', 'none')
+                .style('text-shadow', '0 1px 3px rgba(0,0,0,0.3)');
+
+            // 标题提示
+            nodeGroup.append('title')
+                .text(d => `${d.name} · 练习${d.count}次 · ${getLevelLabel(d.stars)}`);
+
+            // 更新位置
+            simulation.on('tick', () => {
+                linkGroup.attr('d', d => {
+                    const dx = d.target.x - d.source.x;
+                    const dy = d.target.y - d.source.y;
+                    const dr = Math.sqrt(dx * dx + dy * dy);
+                    // 避免重叠时方向错乱
+                    if (dr === 0) return `M ${d.source.x} ${d.source.y} L ${d.target.x} ${d.target.y}`;
+                    const offsetX = (dx / dr) * 12;
+                    const offsetY = (dy / dr) * 12;
+                    const sx = d.source.x + offsetX;
+                    const sy = d.source.y + offsetY;
+                    const tx = d.target.x - offsetX;
+                    const ty = d.target.y - offsetY;
+                    const mx = (sx + tx) / 2;
+                    const my = (sy + ty) / 2 - 20;
+                    return `M ${sx} ${sy} Q ${mx} ${my} ${tx} ${ty}`;
+                });
+                nodeGroup.attr('transform', d => `translate(${d.x}, ${d.y})`);
+            });
+
+            // 拖拽函数
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                // 如果用户不想固定位置，可以解除注释下面两行让节点归位
+                // d.fx = null;
+                // d.fy = null;
+            }
+
+            // 添加缩放功能
+            const zoom = d3.zoom()
+                .scaleExtent([0.3, 3])
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                });
+
+            svg.call(zoom)
+                .on('dblclick.zoom', () => {
+                    // 双击重置缩放
+                    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+                });
+
+            // 处理窗口大小变化
+            window.addEventListener('resize', () => {
+                const newWidth = container.clientWidth || 900;
+                svg.attr('viewBox', `0 0 ${newWidth} ${height}`);
+            });
+        }
+
         // ==================== 数据导入导出 ====================
-        function exportData() {
+        window.exportData = function() {
             const data = {
+                tricks: getAllTricks(),
                 logs: loadLogs(),
                 videos: loadVideos(),
                 statuses: loadStatuses(),
+                docs: loadDocuments(),
+                relations: loadRelations(),
                 exportedAt: new Date().toISOString(),
             };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1398,11 +2964,13 @@
             a.download = `滑板学习记录_备份_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
-        }
-        function importDataPrompt() {
+        };
+
+        window.importDataPrompt = function() {
             document.getElementById('importFileInput').click();
-        }
-        function importData(event) {
+        };
+
+        window.importData = function(event) {
             const file = event.target.files[0];
             if (!file) return;
             if (!confirm('导入数据将覆盖现有记录，确定继续吗？')) {
@@ -1413,6 +2981,10 @@
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
+                    if (data.tricks && Array.isArray(data.tricks)) {
+                        saveTricks(data.tricks);
+                        refreshTricksCache();
+                    }
                     if (data.logs && Array.isArray(data.logs)) {
                         saveLogs(data.logs);
                     }
@@ -1422,6 +2994,12 @@
                     if (data.statuses && typeof data.statuses === 'object') {
                         saveStatuses(data.statuses);
                     }
+                    if (data.docs && typeof data.docs === 'object') {
+                        saveDocuments(data.docs);
+                    }
+                    if (data.relations && Array.isArray(data.relations)) {
+                        saveRelations(data.relations);
+                    }
                     alert('✅ 数据导入成功！');
                     renderAll();
                 } catch (err) {
@@ -1430,7 +3008,8 @@
             };
             reader.readAsText(file);
             event.target.value = '';
-        }
+        };
+
         // ==================== TAB切换 ====================
         function switchTab(tabName) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1439,35 +3018,49 @@
             const content = document.getElementById(tabName);
             if (btn) btn.classList.add('active');
             if (content) content.classList.add('active');
-            if (tabName === 'tab-log') renderLogs();
+            if (tabName === 'tab-log') {
+                renderLogs();
+                if (calendarYear === undefined) initCalendar();
+                else renderCalendar();
+            }
             if (tabName === 'tab-stats') renderStats();
             if (tabName === 'tab-list') renderTrickList();
+            if (tabName === 'tab-graph') {
+                // 延迟渲染以确保容器尺寸正确
+                setTimeout(renderGraph, 100);
+            }
         }
+
         // ==================== 键盘事件 ====================
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 const overlay = document.getElementById('modalOverlay');
-                if (overlay.style.display === 'flex') {
+                if (overlay.classList.contains('show')) {
                     closeModal();
                 }
             }
         });
+
         // ==================== 初始化 ====================
         function renderAll() {
             renderTrickList();
             renderLogs();
             renderStats();
+            setTimeout(renderGraph, 200);
         }
+
         function init() {
-            // Tab点击事件
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     switchTab(this.dataset.tab);
                 });
             });
-            // 初始渲染
+
+            refreshTricksCache();
+            loadRelations();
+            initCalendar();
             renderAll();
-            // 如果没有日志，添加一些示例数据引导
+
             const logs = loadLogs();
             if (logs.length === 0) {
                 const sampleLogs = [{
@@ -1499,16 +3092,23 @@
                     createdAt: Date.now()
                 }];
                 saveLogs(sampleLogs);
-                // 设置示例状态
                 saveStatuses({ 'street_ollie': 'practice', 'bowl_dropping_in': 'practice' });
                 renderAll();
             }
+
+            console.log('🛹 滑板学习记录表已就绪！');
+            console.log('📋 动作清单 - 可自由增删改动作');
+            console.log('✅ 打卡记录 - 月度日历，绿色标记有打卡的日期');
+            console.log('📊 统计 - 查看练习数据');
+            console.log('🗺️ 关系图 - 力导向自动布局，可拖拽/缩放');
+            console.log('📥 使用备份功能导出数据');
         }
-        init();
-        console.log('🛹 滑板学习记录表已就绪！');
-        console.log('📋 动作清单 - 查看碗池和街市动作');
-        console.log('✅ 打卡记录 - 记录每次练习');
-        console.log('📊 统计 - 查看练习数据');
-        console.log('💡 点击动作卡片查看详情和视频');
-        console.log('📥 使用备份功能导出数据');
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
     </script>
+</body>
+</html>
